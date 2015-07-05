@@ -7,6 +7,6 @@ class DisplayMapper:
         pass
 
 def convertFieldPosition(posX,posY):
-    dispX = int(posX * WINDOW_WIDTH/FIELD_LENGTH)
-    dispY = int(posY * (WINDOW_HEIGHT-WINDOW_HEADER_HEIGHT)/FIELD_WIDTH)
+    dispX = int(posX * WINDOW_WIDTH/FIELD_LENGTH)-5
+    dispY = int(posY * (WINDOW_HEIGHT-WINDOW_HEADER_HEIGHT)/FIELD_WIDTH)-5
     return (dispX,dispY)

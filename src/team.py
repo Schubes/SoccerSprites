@@ -11,12 +11,11 @@ class Team:
 
     def setStartingLineUp(self, formation, ball, window):
         teamPlayers = []
-        teamPlayers.append(FieldPlayer("GK", self, ball, window, 5, FIELD_WIDTH/2))
         if self.isDefendingLeft:
-            formationIter = iter(formation)
+            teamPlayers.append(FieldPlayer("GK", self, ball, window, 5, FIELD_WIDTH/2))
         else:
-            formationIter = reversed(formation)
-        for lineNum, line in enumerate(formationIter):
+            teamPlayers.append(FieldPlayer("GK", self, ball, window, (FIELD_LENGTH - 5), FIELD_WIDTH/2))
+        for lineNum, line in enumerate(formation):
             for posNum, position in enumerate(range(line)):
                 if self.isDefendingLeft:
                     posX = float(lineNum + 1)/len(formation) * FIELD_LENGTH/2

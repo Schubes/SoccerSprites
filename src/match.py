@@ -22,6 +22,8 @@ class Match:
 
         teamPlayers = self.team1.setStartingLineUp((4, 4, 2), self.ball, window)
         self.allsprites = pygame.sprite.LayeredDirty(teamPlayers)
+        teamPlayers = self.team2.setStartingLineUp((4, 3, 3), self.ball, window)
+        self.allsprites.add(teamPlayers)
 
     def playMatchTurn(self):
         self.allsprites.update()

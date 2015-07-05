@@ -61,6 +61,8 @@ class FieldPlayer(PitchObject):
         self.posX += float(needsToBeImplemented)/GAME_FPS
         self.confirmInBounds()
 
+    def defend(self):
+        pass
 
     def confirmInBounds(self):
         """keep players from running out of bounds"""
@@ -72,4 +74,3 @@ class FieldPlayer(PitchObject):
             self.posY = FIELD_WIDTH
         if self.posY < 0:
             self.posY = 0
-
