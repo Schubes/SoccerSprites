@@ -5,7 +5,7 @@ __author__ = 'Thomas'
 
 class Ball(PitchObject):
     def __init__(self,pitchSurface):
-        PitchObject.__init__(self,pitchSurface,COLOR_BALL)
+        PitchObject.__init__(self,pitchSurface,COLOR_BALL,self.getStartingPosX(),self.getStartingPosY())
         self.closetDefender = self.getClosetDefender()
         self.possesor = self.getPossesor()
 

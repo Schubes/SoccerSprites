@@ -7,11 +7,11 @@ needsToBeImplemented = 10
 
 class FieldPlayer(PitchObject):
     """Class for players currently on the pitch"""
-    def __init__(self, playerRole, team, ball, pitchSurface):
+    def __init__(self, playerRole, team, ball, pitchSurface, posX, posY):
         """
         playerRole is a string ("gk", "lb", "cb", etc...)
         """
-        PitchObject.__init__(self, pitchSurface, team.color)
+        PitchObject.__init__(self, pitchSurface, team.color, posX, posY)
         self.playerRole = playerRole
         self.team = team
         self.shootingRange = needsToBeImplemented
@@ -40,7 +40,7 @@ class FieldPlayer(PitchObject):
         PitchObject.update(self)
 
     def makeAction(self):
-        if self.team.getHasPossession():
+        if self.team.hasPossession:
             if self.hasBall == True:
                 self.makePlay()
             else:

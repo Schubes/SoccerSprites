@@ -20,14 +20,11 @@ class Match:
 
         self.ball = Ball(self.pitchSurface)
 
-        #until I write up nice formations
-        self.player = FieldPlayer("GK", self.team1, self.ball, self.window)
-        self.player.posY = 53.33/2
-        self.player.posX = 10
-        self.allsprites = pygame.sprite.LayeredDirty((self.player,))
+        teamPlayers = self.team1.setStartingLineUp((4, 4, 2), self.ball, window)
+        self.allsprites = pygame.sprite.LayeredDirty(teamPlayers)
 
     def playMatchTurn(self):
-        self.player.update()
+        self.allsprites.update()
         self.allsprites.draw(self.pitchSurface)
         self.allsprites.clear(self.pitchSurface, self.fieldBackground)
         self.window.blit(self.pitchSurface, (0, WINDOW_HEADER_HEIGHT))
