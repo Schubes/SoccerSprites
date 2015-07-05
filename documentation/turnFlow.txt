@@ -1,0 +1,6 @@
+Move Offensive Players (except player with ball)
+Move Player with Ball
+    might want to create a ball trajectory object
+Move Defensive Players
+    evaluate the ball trajectory object
+Determine final Ball position and possession for next turn
