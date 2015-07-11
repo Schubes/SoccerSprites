@@ -2,8 +2,9 @@ import pygame
 from display.displaymapper import convertFieldPosition, convertYards2Pixels
 from gamevariables import COLOR_TEAM_BLUE, COLOR_TEAM_RED, WINDOW_HEADER_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, \
     COLOR_GRASS, COLOR_PAINT, FIELD_LENGTH, FIELD_WIDTH, PAINT_WIDTH
+from grandobserver import GrandObserver
 from pitchObjects.ball import Ball
-from pitchObjects.fieldPlayer import FieldPlayer
+from pitchObjects.fieldplayer import FieldPlayer
 from team import Team
 
 __author__ = 'Thomas'
@@ -19,17 +20,33 @@ class Match:
         self.team1 = Team(True, COLOR_TEAM_BLUE)
         self.team2 = Team(False, COLOR_TEAM_RED)
 
-        self.ball = Ball(self.pitchSurface)
-        self.allsprites = pygame.sprite.LayeredDirty(self.ball)
-        teamPlayers = self.team1.setStartingLineUp((4, 4, 2), self.ball, window)
-        self.allsprites.add(teamPlayers)
-        teamPlayers = self.team2.setStartingLineUp((4, 3, 3), self.ball, window)
-        self.allsprites.add(teamPlayers)
+        self.nonPlayers = pygame.sprite.LayeredDirty()
+        self.ball = Ball()
+        self.nonPlayers.add(self.ball)
+
+        self.allPlayers = pygame.sprite.LayeredDirty()
+        self.team1.setStartingLineUp((4, 4, 2), self.ball, window)
+        self.allPlayers.add(self.team1.players)
+        self.team2.setStartingLineUp((4, 3, 3), self.ball, window)
+        self.allPlayers.add(self.team2.players)
+
+        self.allObjects = pygame.sprite.LayeredDirty(self.allPlayers,self.nonPlayers)
+        print self.allObjects.get_layer_of_sprite(self.ball)
+        self.allObjects.move_to_back(self.ball)
+        print self.allObjects.get_layer_of_sprite(self.ball)
+
+        self.ball.posX = 30
+        self.ball.posY = 10
+
+        self.grandObserver = GrandObserver(self.team1, self.team2, self.ball)
+
 
     def playMatchTurn(self):
-        self.allsprites.update()
-        self.allsprites.draw(self.pitchSurface)
-        self.allsprites.clear(self.pitchSurface, self.fieldBackground)
+        self.grandObserver.analyze()
+        self.allPlayers.update(self.grandObserver)
+        self.nonPlayers.update(self.allPlayers)
+        self.allObjects.draw(self.pitchSurface)
+        self.allObjects.clear(self.pitchSurface, self.fieldBackground)
         self.window.blit(self.pitchSurface, (0, WINDOW_HEADER_HEIGHT))
 
 

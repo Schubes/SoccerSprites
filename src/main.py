@@ -14,12 +14,8 @@ timer = FpsClock(GAME_FPS)
 
 match = Match(window)
 
-#while True:
-match.playMatchTurn()
-pygame.display.update()
-timer.tick()
-
-
 while True:
-    pass
+    match.playMatchTurn()
+    pygame.display.update()
+    timer.tick()
 

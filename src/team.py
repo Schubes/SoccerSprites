@@ -1,5 +1,5 @@
 from gamevariables import FIELD_LENGTH, FIELD_WIDTH
-from pitchObjects.fieldPlayer import FieldPlayer
+from pitchObjects.fieldplayer import FieldPlayer
 
 __author__ = 'Thomas'
 
@@ -8,13 +8,14 @@ class Team:
         self.isDefendingLeft = isDefendingLeft
         self.hasPossession = isDefendingLeft
         self.color = color
+        self.players = []
 
     def setStartingLineUp(self, formation, ball, window):
-        teamPlayers = []
+        players = []
         if self.isDefendingLeft:
-            teamPlayers.append(FieldPlayer("GK", self, ball, window, 5, FIELD_WIDTH/2))
+            players.append(FieldPlayer("GK", self, ball, 5, FIELD_WIDTH/2))
         else:
-            teamPlayers.append(FieldPlayer("GK", self, ball, window, (FIELD_LENGTH - 5), FIELD_WIDTH/2))
+            players.append(FieldPlayer("GK", self, ball, (FIELD_LENGTH - 5), FIELD_WIDTH/2))
         for lineNum, line in enumerate(formation):
             for posNum, position in enumerate(range(line)):
                 if self.isDefendingLeft:
@@ -22,5 +23,6 @@ class Team:
                 else:
                     posX = FIELD_LENGTH - (float(lineNum + 1)/len(formation) * FIELD_LENGTH/2)
                 posY = float(posNum+.5)/line * FIELD_WIDTH
-                teamPlayers.append(FieldPlayer("", self, ball, window, posX, posY))
-        return teamPlayers
+                players.append(FieldPlayer(lineNum, self, ball, posX, posY))
+        self.players = players
+        return players

@@ -3,58 +3,57 @@ from pitchObjects.pitchobject import PitchObject
 
 __author__ = 'Thomas'
 
-needsToBeImplemented = 10
+needsToBeImplemented = 5
 
 class FieldPlayer(PitchObject):
     """Class for players currently on the pitch"""
-    def __init__(self, playerRole, team, ball, pitchSurface, posX, posY):
+    def __init__(self, playerRole, team, ball, posX, posY):
         """
         playerRole is a string ("gk", "lb", "cb", etc...)
         """
-        PitchObject.__init__(self, pitchSurface, team.color, posX, posY)
+        PitchObject.__init__(self, team.color, posX, posY)
         self.playerRole = playerRole
         self.team = team
         self.shootingRange = needsToBeImplemented
         self.hasBall = False
-        self.Ball = ball
-
-
-    def getStartingPosX(self):
-        #TODO: Choose where to put the players based on position
-        return 0
-
-    def getStartingPosY(self):
-        #TODO: Choose where to put the players based on position
-        return 0
+        self.ball = ball
+        self.isOffsides = False
+        self.covering = []
+        self.blocking = []
+        self.isBlockedBy = []
+        self.isCoveredBy = []
 
     def isInShootingRange(self):
-        if self.team.isDefendingLeft():
-            if (self.posX + self.posY^2) < self.shootingRange:
-                #I'm intentionally weighting the vertical distance stronger
-                return True
-        elif (self.posX-100 + self.posY^2) < self.shootingRange:
+        if self.getWeightedDistanceToGoal(True) < self.shootingRange:
             return True
+        else:
+            return False
 
-    def update(self):
-        self.makeAction()
+    def update(self, grandObserver):
+        self.makeAction(grandObserver)
         PitchObject.update(self)
 
-    def makeAction(self):
+    def makeAction(self, grandObserver):
         if self.team.hasPossession:
-            if self.hasBall == True:
-                self.makePlay()
+            if self.hasBall:
+                self.makePlay(grandObserver)
             else:
                 self.makeRun()
         else:
             self.defend()
 
-    def makePlay(self):
+    def makePlay(self, grandObserver):
         if self.isInShootingRange():
             self.ball.simShot()
         else:
-            #TODO: make this other sort of pass :P
-            #TODO: let them dribble
-            pass
+            bestPassOption = self
+            for openPlayer in grandObserver.openPlayers:
+                if openPlayer.getDistanceToGoalline(True) < bestPassOption.getDistanceToGoalline(True):
+                    bestPassOption = openPlayer
+            if bestPassOption is not self:
+                self.ball.passTo(bestPassOption)
+            else:
+                self.makeRun()
 
     def makeRun(self):
         #TODO: Make players less stupid
@@ -74,3 +73,14 @@ class FieldPlayer(PitchObject):
             self.posY = FIELD_WIDTH
         if self.posY < 0:
             self.posY = 0
+
+    def getWeightedDistanceToGoal(self, attacking):
+        return self.getDistanceToGoalline(attacking) + (self.posY-FIELD_WIDTH/2)**2
+
+    def getDistanceToGoalline(self, attacking):
+        if self.team.isDefendingLeft and not attacking:
+            return self.posX
+        elif not self.team.isDefendingLeft and attacking:
+            return self.posX
+        else:
+            return abs(self.posX-FIELD_LENGTH)

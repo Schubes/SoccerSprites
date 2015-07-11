@@ -1,0 +1,14 @@
+Player has a home position that they can not stray too far from
+
+Defense:
+Player examines the closest uncovered player
+Follows that player
+
+Offense:
+Players move forward and try to get open
+
+Ball Holder:
+Player thinks about shooting
+Player looks for open pass
+Player dribbles
+
