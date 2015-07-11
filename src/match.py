@@ -17,8 +17,8 @@ class Match:
         self.pitchSurface = self.createPitchSurface()
         self.fieldBackground = self.createPitchSurface()
 
-        self.team1 = Team(True, COLOR_TEAM_BLUE)
-        self.team2 = Team(False, COLOR_TEAM_RED)
+        self.team1 = Team(True, COLOR_TEAM_BLUE, "Blue Team")
+        self.team2 = Team(False, COLOR_TEAM_RED, "Red Team")
 
         self.nonPlayers = pygame.sprite.LayeredDirty()
         self.ball = Ball()
@@ -31,9 +31,7 @@ class Match:
         self.allPlayers.add(self.team2.players)
 
         self.allObjects = pygame.sprite.LayeredDirty(self.allPlayers,self.nonPlayers)
-        print self.allObjects.get_layer_of_sprite(self.ball)
         self.allObjects.move_to_back(self.ball)
-        print self.allObjects.get_layer_of_sprite(self.ball)
 
         self.ball.posX = 30
         self.ball.posY = 10

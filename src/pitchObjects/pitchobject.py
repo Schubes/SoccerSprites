@@ -1,5 +1,6 @@
 import pygame
 from display.displaymapper import convertFieldPosition
+from gamevariables import FIELD_LENGTH
 
 __author__ = 'Thomas'
 
@@ -23,3 +24,14 @@ class PitchObject(pygame.sprite.DirtySprite):
 
     def update(self):
         self.rect.center = convertFieldPosition(self.posX, self.posY)
+
+    def getDistanceToGoalline(self, attacking, isDefendingLeft):
+        if isDefendingLeft and not attacking:
+            return self.posX
+        elif not isDefendingLeft and attacking:
+            return self.posX
+        else:
+            return abs(self.posX-FIELD_LENGTH)
+
+    def squaredDistanceTo(self, pitchObject):
+        return ((self.posX - pitchObject.posX)**2) + ((self.posY - pitchObject.posY)**2)

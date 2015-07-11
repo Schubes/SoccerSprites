@@ -59,8 +59,9 @@ class GrandObserver:
                 self.openPlayers.append(attackingPlayer)
 
 
-    def attackerIsCloserToGoalline(self,attacker,defender):
-        if attacker.getDistanceToGoalline(True) < defender.getDistanceToGoalline(False):
+    def attackerIsCloserToGoalline(self, attacker, defender):
+        if attacker.getDistanceToGoalline(True) < \
+                defender.getDistanceToGoalline(False):
             return True
         else:
             return False

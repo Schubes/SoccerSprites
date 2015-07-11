@@ -4,11 +4,12 @@ from pitchObjects.fieldplayer import FieldPlayer
 __author__ = 'Thomas'
 
 class Team:
-    def __init__(self,isDefendingLeft, color):
+    def __init__(self,isDefendingLeft, color, name):
         self.isDefendingLeft = isDefendingLeft
         self.hasPossession = isDefendingLeft
         self.color = color
         self.players = []
+        self.name = name
 
     def setStartingLineUp(self, formation, ball, window):
         players = []

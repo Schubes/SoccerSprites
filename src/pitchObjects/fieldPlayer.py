@@ -1,9 +1,8 @@
-from gamevariables import FIELD_LENGTH, FIELD_WIDTH, GAME_FPS
+import math
+from gamevariables import FIELD_LENGTH, FIELD_WIDTH, GAME_FPS, STRAT_NEARBALL, STRAT_SHOOTINGRANGE, ATTR_PLAYERSPEED
 from pitchObjects.pitchobject import PitchObject
 
 __author__ = 'Thomas'
-
-needsToBeImplemented = 5
 
 class FieldPlayer(PitchObject):
     """Class for players currently on the pitch"""
@@ -14,7 +13,7 @@ class FieldPlayer(PitchObject):
         PitchObject.__init__(self, team.color, posX, posY)
         self.playerRole = playerRole
         self.team = team
-        self.shootingRange = needsToBeImplemented
+        self.shootingRange = STRAT_SHOOTINGRANGE
         self.hasBall = False
         self.ball = ball
         self.isOffsides = False
@@ -22,6 +21,7 @@ class FieldPlayer(PitchObject):
         self.blocking = []
         self.isBlockedBy = []
         self.isCoveredBy = []
+        self.speed = float(ATTR_PLAYERSPEED)
 
     def isInShootingRange(self):
         if self.getWeightedDistanceToGoal(True) < self.shootingRange:
@@ -31,6 +31,7 @@ class FieldPlayer(PitchObject):
 
     def update(self, grandObserver):
         self.makeAction(grandObserver)
+        self.confirmInBounds()
         PitchObject.update(self)
 
     def makeAction(self, grandObserver):
@@ -50,18 +51,54 @@ class FieldPlayer(PitchObject):
             for openPlayer in grandObserver.openPlayers:
                 if openPlayer.getDistanceToGoalline(True) < bestPassOption.getDistanceToGoalline(True):
                     bestPassOption = openPlayer
+
             if bestPassOption is not self:
                 self.ball.passTo(bestPassOption)
             else:
                 self.makeRun()
 
     def makeRun(self):
-        #TODO: Make players less stupid
-        self.posX += float(needsToBeImplemented)/GAME_FPS
-        self.confirmInBounds()
+        #TODO: Clean this up
+        if self.isOffsides:
+            self.posX -= self.dirX(self.speed)
+        else:
+            if self.ball.isLoose:
+                if self.nearBall():
+                    self.chase(self.ball)
+                else:
+                    self.posX += self.dirX(self.speed)
+            else:
+                self.posX += self.dirX(self.speed)
 
     def defend(self):
-        pass
+        if self.nearBall():
+            self.chase(self.ball)
+        elif self.covering:
+            self.chase(self.covering[0])
+        else:
+            self.reposition()
+
+    def nearBall(self):
+        if self.squaredDistanceTo(self.ball) < STRAT_NEARBALL:
+            return True
+        else:
+            return False
+
+    def chase(self, pitchObject):
+        #TODO: eventually want to factor in dervatives of position
+        difX = pitchObject.posX - self.posX
+        difY = pitchObject.posY - self.posY
+        dif = abs(difX) + abs(difY)
+        if not dif == 0:
+            self.posX += self.dirX(float(difX)/dif * self.speed)
+            self.posY += float(difY)/dif * self.speed
+
+    def reposition(self):
+        if self.playerRole < 3 and self.ball.getDistanceToGoalline(False, self.team.isDefendingLeft) < \
+                        self.getDistanceToGoalline(False) + 10:
+            self.posX -= self.dirX(self.speed)
+        elif self.isOffsides:
+            self.posX -= self.dirX(self.speed)
 
     def confirmInBounds(self):
         """keep players from running out of bounds"""
@@ -75,12 +112,13 @@ class FieldPlayer(PitchObject):
             self.posY = 0
 
     def getWeightedDistanceToGoal(self, attacking):
-        return self.getDistanceToGoalline(attacking) + (self.posY-FIELD_WIDTH/2)**2
+        return self.getDistanceToGoalline(attacking)*10 + (self.posY-FIELD_WIDTH/2)**2
 
     def getDistanceToGoalline(self, attacking):
-        if self.team.isDefendingLeft and not attacking:
-            return self.posX
-        elif not self.team.isDefendingLeft and attacking:
-            return self.posX
+        return PitchObject.getDistanceToGoalline(self, attacking, self.team.isDefendingLeft)
+
+    def dirX(self, horizontalValue):
+        if self.team.isDefendingLeft:
+            return horizontalValue
         else:
-            return abs(self.posX-FIELD_LENGTH)
+            return - horizontalValue

@@ -1,6 +1,6 @@
 import pygame
 import math
-from gamevariables import FIELD_LENGTH, FIELD_WIDTH, COLOR_BALL, GAME_FPS, COLOR_PAINT
+from gamevariables import FIELD_LENGTH, FIELD_WIDTH, COLOR_BALL, GAME_FPS, COLOR_PAINT, MECH_TURNSUNTOUCHABLE
 from pitchObjects.pitchobject import PitchObject
 
 __author__ = 'Thomas'
@@ -14,6 +14,10 @@ class Ball(PitchObject):
 
         self.closetDefender = self.getClosetDefender()
         self.possessor = None
+        self.attackingTeam = None
+        self.isLoose = True
+        self.turnsUntouchable = 0
+
         self.velX = 0
         self.velY = 0
 
@@ -24,7 +28,13 @@ class Ball(PitchObject):
         return FIELD_WIDTH/2
 
     def simShot(self):
+        print "Shot Fired!"
+
+
+        self.possessor.hasBall = False
         self.possessor = None
+        self.isLoose = True
+
         #TODO: make the players kick a bit harder
         self.posX = self.posX
         self.posY = self.posY
@@ -32,20 +42,22 @@ class Ball(PitchObject):
     def passTo(self, player):
         assert self.possessor is not None
         assert self.possessor.hasBall
+
         self.possessor.hasBall = False
-        self.possessor.team.hasPossession = False
         self.possessor = None
-        #for better visualization of who has the ball
+        self.isLoose = True
+
         distanceToPlayer = math.sqrt((player.posX - self.posX)**2 + (player.posY - self.posY)**2)
         #the idea is that you kick the ball faster if it is going further, but it's not linear
-        self.velX = math.sqrt(distanceToPlayer) * (player.posX - self.posX)/20
-        self.velY = math.sqrt(distanceToPlayer) * (player.posY - self.posY)/20
+        self.velX = math.log10(distanceToPlayer) * (player.posX - self.posX)/5
+        self.velY = math.log10(distanceToPlayer) * (player.posY - self.posY)/5
 
     def update(self,players):
-        self.turnResult(players)
+        self.moveBall()
+        self.evaluateControl(players)
         PitchObject.update(self)
 
-    def turnResult(self, players):
+    def moveBall(self):
         #if there is a player controlling the ball, the ball should move with that player
         if self.possessor is not None:
             self.posX = self.possessor.posX
@@ -55,16 +67,26 @@ class Ball(PitchObject):
         else:
             self.posX += self.velX / GAME_FPS
             self.posY += self.velY / GAME_FPS
-        if self.possessor:
-            self.possessor.hasBall = False
-            self.possessor.team.hasPossession = False
 
-        players = pygame.sprite.spritecollide(self, players, False)
-        if players:
-            self.possessor = players[0]
-            players[0].hasBall = True
-            players[0].team.hasPossession = True
+    def evaluateControl(self, players):
+        if self.turnsUntouchable > 0:
+            self.turnsUntouchable -= 1
+        else:
+            players = pygame.sprite.spritecollide(self, players, False)
+            if players:
+                print "New Player?"
+                #remove possesion from previous team
+                if self.attackingTeam:
+                    self.attackingTeam.hasPossession = False
 
+                #select the first player who touched the ball
+                self.possessor = players[0]
+                #set new possesion
+                self.isLoose = False
+                self.attackingTeam = players[0].team
+                players[0].hasBall = True
+                players[0].team.hasPossession = True
+                self.turnsUntouchable = MECH_TURNSUNTOUCHABLE
 
 
     def getClosetDefender(self):
