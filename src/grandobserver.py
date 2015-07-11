@@ -52,10 +52,11 @@ class GrandObserver:
 
         #check offsides
         for attackingPlayer in attackingTeam.players:
-            if self.attackerIsCloserToGoalline(attackingPlayer, lastDefender):
+            if self.attackerIsCloserToGoalline(attackingPlayer, lastDefender) and not self.ball.isLoose:
                 attackingPlayer.isOffsides = True
-            else:
+            elif self.ball.isLoose:
                 attackingPlayer.isOffsides = False
+            if not attackingPlayer.isOffsides:
                 self.openPlayers.append(attackingPlayer)
 
 
