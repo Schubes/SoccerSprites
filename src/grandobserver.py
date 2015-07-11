@@ -1,5 +1,6 @@
 import math
-from gamevariables import STRAT_BLOCKAGE, STRAT_COVERAGE
+from display.displaymapper import FIELD_WIDTH
+from gamevariables import STRAT_BLOCKAGE, STRAT_COVERAGE, COLOR_ORANGE
 
 __author__ = 'Thomas'
 
@@ -20,21 +21,37 @@ class GrandObserver:
             defendingTeam = self.team1
 
 
-        self.closestAttacker = attackingTeam.players[0]
-        self.closestDefender = defendingTeam.players[0]
+        closestAttacker = attackingTeam.players[0]
+        closestDefender = defendingTeam.players[0]
 
         self.openPlayers = []
         lastDefender = defendingTeam.players[0]
         for defendingPlayer in defendingTeam.players:
+
+            defendingPlayer.blocking = []
+            defendingPlayer.covering = []
+            defendingPlayer.isClosestToBall = False
+
             if defendingPlayer.getDistanceToGoalline(False) < lastDefender.getDistanceToGoalline(False):
                 lastDefender = defendingPlayer
-                defendingPlayer.blocking = []
-                defendingPlayer.covering = []
-            if defendingPlayer.squaredDistanceTo(self.ball) < self.closestDefender.squaredDistanceTo(self.ball):
-                self.closestDefender = defendingPlayer
+            if defendingPlayer.squaredDistanceTo(self.ball) < closestDefender.squaredDistanceTo(self.ball):
+                if defendingPlayer.getDistanceToGoalline(False) < self.ball.getDistanceToGoalline(False, defendingTeam.isDefendingLeft):
+                    closestDefender = defendingPlayer
+
+        closestDefender.isClosestToBall = True
+
+        self.setCoveredAndBlockedPlayers(attackingTeam, defendingTeam)
+        self.setOffsides(attackingTeam, lastDefender)
 
         for attackingPlayer in attackingTeam.players:
+            if not attackingPlayer.isOffsides and not attackingPlayer.coveredBy and not attackingPlayer.blockedBy:
+                self.openPlayers.append(attackingPlayer)
 
+            if attackingPlayer.squaredDistanceTo(self.ball) < closestAttacker.squaredDistanceTo(self.ball):
+                closestAttacker = attackingPlayer
+
+    def setCoveredAndBlockedPlayers(self, attackingTeam, defendingTeam):
+        for attackingPlayer in attackingTeam.players:
             attackingPlayer.blockedBy = []
             attackingPlayer.coveredBy = []
             for defendingPlayer in defendingTeam.players:
@@ -55,17 +72,16 @@ class GrandObserver:
                         attackingPlayer.coveredBy += [defendingPlayer]
                         defendingPlayer.covering += [attackingPlayer]
 
-        #check offsides
+    def setOffsides(self, attackingTeam, lastDefender):
         for attackingPlayer in attackingTeam.players:
-            if self.attackerIsCloserToGoalline(attackingPlayer, lastDefender) and not self.ball.isLoose:
-                attackingPlayer.isOffsides = True
-            elif self.ball.isLoose:
+            if not self.ball.isLoose:
                 attackingPlayer.isOffsides = False
-            if not attackingPlayer.isOffsides:
-                self.openPlayers.append(attackingPlayer)
-            if attackingPlayer.squaredDistanceTo(self.ball) < self.closestAttacker.squaredDistanceTo(self.ball):
-                self.closestAttacker = attackingPlayer
-
+                if attackingPlayer.getDistanceToGoalline(True) < FIELD_WIDTH/2:
+                    if self.attackerIsCloserToGoalline(attackingPlayer, lastDefender):
+                        if self.ball.possessor and attackingPlayer.getDistanceToGoalline(True) < self.ball.possessor.getDistanceToGoalline(True):
+                            attackingPlayer.isOffsides = True
+                        elif not self.ball.possessor:
+                            attackingPlayer.isOffsides = True
 
     def attackerIsCloserToGoalline(self, attacker, defender):
         if attacker.getDistanceToGoalline(True) < \

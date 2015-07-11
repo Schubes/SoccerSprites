@@ -1,7 +1,6 @@
 import pygame
 from display.displaymapper import FIELD_LENGTH, FIELD_WIDTH
-from gamevariables import STRAT_NEAR_BALL, ATTR_PLAYER_SPEED, ATTR_SHOOTING_RANGE, COLOR_GRASS, GRAPH_PLAYER_SIZE, \
-    STRAT_HOME_POS_SIZE
+from gamevariables import STRAT_NEAR_BALL, ATTR_PLAYER_SPEED, ATTR_SHOOTING_RANGE, GRAPH_PLAYER_SIZE, ATTR_PLAYER_ACCEL
 from pitchObjects.homeposition import HomePosition
 from pitchObjects.pitchobject import PitchObject
 
@@ -29,7 +28,9 @@ class FieldPlayer(PitchObject):
         self.blocking = []
         self.isBlockedBy = []
         self.isCoveredBy = []
+        self.isClosestToBall = False
         self.speed = float(ATTR_PLAYER_SPEED)
+        self.acceleration = ATTR_PLAYER_ACCEL
 
     def isInShootingRange(self):
         if self.getWeightedDistanceToGoal(True) < self.shootingRange:
@@ -40,6 +41,7 @@ class FieldPlayer(PitchObject):
     def update(self, grandObserver):
         self.homePosition.update()
         self.makeAction(grandObserver)
+        # self.move()
         self.confirmInBounds()
         PitchObject.update(self)
 
@@ -61,6 +63,7 @@ class FieldPlayer(PitchObject):
                     bestPassOption = grandObserver.openPlayers[0]
             else:
                 bestPassOption = self
+            print len(grandObserver.openPlayers)
             for openPlayer in grandObserver.openPlayers:
                 if openPlayer.getDistanceToGoalline(True) < bestPassOption.getDistanceToGoalline(True):
                     bestPassOption = openPlayer
@@ -85,12 +88,20 @@ class FieldPlayer(PitchObject):
 
 
     def defend(self):
-        if self.nearBall():
+        if self.isClosestToBall:
+            self.chase(self.ball)
+        elif not pygame.sprite.collide_rect(self, self.ball):
+            self.chase(self.homePosition)
+        elif self.nearBall():
             self.chase(self.ball)
         elif self.covering:
+            print "covering"
             self.chase(self.covering[0])
-        else:
-            self.chase(self.homePosition)
+        elif self.blocking:
+            self.chase(self.blocking[0])
+        else: self.chase(self.ball)
+        # else:
+        #     self.chase(self.homePosition)
 
     def nearBall(self):
         if self.squaredDistanceTo(self.ball) < STRAT_NEAR_BALL:
@@ -107,6 +118,7 @@ class FieldPlayer(PitchObject):
             self.posX += float(difX) / dif * self.speed
             self.posY += float(difY) / dif * self.speed
 
+    #NOT USED
     def reposition(self):
         if self.playerRole < 3 and self.ball.getDistanceToGoalline(False, self.team.isDefendingLeft) < \
                         self.getDistanceToGoalline(False) + 10:

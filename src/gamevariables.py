@@ -16,16 +16,17 @@ GRAPH_BALL_SIZE = [20, 20]
 
 PAINT_WIDTH = 3
 
-GAME_FPS = 5
+GAME_FPS = 30
 
-STRAT_HOME_POS_SIZE = [convertYards2Pixels(25), convertYards2Pixels(30)]
-STRAT_COVERAGE = 25 #Yards Squared
+STRAT_HOME_POS_SIZE = [convertYards2Pixels(30), convertYards2Pixels(30)]
+STRAT_COVERAGE = 10**2 #Yards Squared
 STRAT_BLOCKAGE = math.radians(5) #Theta difference in radians
-STRAT_NEAR_BALL = 125 #Yards Squared
+STRAT_NEAR_BALL = 12**2 #Yards Squared
 
-ATTR_PLAYER_SPEED = 5/GAME_FPS
+ATTR_PLAYER_SPEED = float(10)/GAME_FPS
+ATTR_PLAYER_ACCEL = float(1)/GAME_FPS
 ATTR_SHOOTING_RANGE = 200 #Abstract Units check its usage
 
-MECH_TURNS_UNTOUCHABLE = 2
-
+MECH_TURNS_UNTOUCHABLE = GAME_FPS * 1/5
+MECH_BALL_SPEED = 800/GAME_FPS
 

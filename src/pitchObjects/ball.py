@@ -1,7 +1,7 @@
 import pygame
 import math
 from display.displaymapper import FIELD_LENGTH, FIELD_WIDTH
-from gamevariables import COLOR_BALL, GAME_FPS, MECH_TURNS_UNTOUCHABLE, GRAPH_BALL_SIZE
+from gamevariables import COLOR_BALL, GAME_FPS, MECH_TURNS_UNTOUCHABLE, GRAPH_BALL_SIZE, MECH_BALL_SPEED
 from pitchObjects.pitchobject import PitchObject
 
 __author__ = 'Thomas'
@@ -40,6 +40,7 @@ class Ball(PitchObject):
     def passTo(self, player):
         assert self.possessor is not None
         assert self.possessor.hasBall
+        assert self.possessor.team.hasPossession
 
         self.possessor.hasBall = False
         self.possessor = None
@@ -47,11 +48,12 @@ class Ball(PitchObject):
 
         distanceToPlayer = math.sqrt((player.posX - self.posX)**2 + (player.posY - self.posY)**2)
         #the idea is that you kick the ball faster if it is going further, but it's not linear
-        self.velX = math.log10(distanceToPlayer) * (player.posX - self.posX)/5
-        self.velY = math.log10(distanceToPlayer) * (player.posY - self.posY)/5
+        self.velX = (player.posX - self.posX)/(abs(player.posY - self.posY) + abs(player.posX - self.posX)) * MECH_BALL_SPEED
+        self.velY = (player.posY - self.posY)/(abs(player.posY - self.posY) + abs(player.posX - self.posX)) * MECH_BALL_SPEED
 
     def update(self,players):
         self.moveBall()
+        self.confirmInBounds()
         self.evaluateControl(players)
         PitchObject.update(self)
 
@@ -75,15 +77,28 @@ class Ball(PitchObject):
                 #remove possesion from previous team
                 if self.attackingTeam:
                     self.attackingTeam.hasPossession = False
+                    if self.possessor:
+                        self.possessor.hasBall = False
 
                 #select the first player who touched the ball
                 self.possessor = players[0]
                 #set new possesion
                 self.isLoose = False
                 self.attackingTeam = players[0].team
-                players[0].hasBall = True
-                players[0].team.hasPossession = True
+                self.possessor.hasBall = True
+                self.possessor.team.hasPossession = True
                 self.turnsUntouchable = MECH_TURNS_UNTOUCHABLE
+
+    def confirmInBounds(self):
+        """keep players from running out of bounds"""
+        if self.posX > FIELD_LENGTH:
+            self.posX = FIELD_LENGTH
+        if self.posX < 0:
+            self.posX = 0
+        if self.posY > FIELD_WIDTH:
+            self.posY = FIELD_WIDTH
+        if self.posY < 0:
+            self.posY = 0
 
 
     def getClosetDefender(self):

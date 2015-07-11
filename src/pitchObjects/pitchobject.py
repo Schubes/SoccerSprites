@@ -33,7 +33,7 @@ class PitchObject(pygame.sprite.DirtySprite):
             return abs(self.posX-FIELD_LENGTH)
 
     def squaredDistanceTo(self, pitchObject):
-        return ((self.posX - pitchObject.posX)**2) + ((self.posY - pitchObject.posY)**2)
+        return (float(self.posX - pitchObject.posX)**2) + (float(self.posY - pitchObject.posY)**2)
 
     def relX(self, posX, team):
         if team.isDefendingLeft:

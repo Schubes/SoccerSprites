@@ -1,5 +1,6 @@
 import unittest
-from gamevariables import COLOR_TEAM_BLUE, COLOR_TEAM_RED, FIELD_LENGTH
+from display.displaymapper import FIELD_LENGTH
+from gamevariables import COLOR_TEAM_BLUE, COLOR_TEAM_RED
 from pitchObjects.ball import Ball
 from pitchObjects.fieldplayer import FieldPlayer
 from team import Team
