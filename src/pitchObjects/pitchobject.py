@@ -1,15 +1,14 @@
 import pygame
-from display.displaymapper import convertFieldPosition
-from gamevariables import FIELD_LENGTH
+from display.displaymapper import convertFieldPosition, FIELD_LENGTH
 
 __author__ = 'Thomas'
 
 class PitchObject(pygame.sprite.DirtySprite):
     """Super class for fieldPlayers and ball"""
-    def __init__(self, color, posX, posY):
+    def __init__(self, color, posX, posY, size):
         pygame.sprite.DirtySprite.__init__(self)
 
-        self.image = pygame.Surface([10, 10])
+        self.image = pygame.Surface(size)
         self.image.fill(color)
 
         self.rect = self.image.get_rect()
@@ -35,3 +34,9 @@ class PitchObject(pygame.sprite.DirtySprite):
 
     def squaredDistanceTo(self, pitchObject):
         return ((self.posX - pitchObject.posX)**2) + ((self.posY - pitchObject.posY)**2)
+
+    def relX(self, posX, team):
+        if team.isDefendingLeft:
+            return posX
+        else:
+            return FIELD_LENGTH - posX

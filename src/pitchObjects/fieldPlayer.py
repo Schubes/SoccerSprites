@@ -1,19 +1,27 @@
-import math
-from gamevariables import FIELD_LENGTH, FIELD_WIDTH, GAME_FPS, STRAT_NEARBALL, STRAT_SHOOTINGRANGE, ATTR_PLAYERSPEED
+import pygame
+from display.displaymapper import FIELD_LENGTH, FIELD_WIDTH
+from gamevariables import STRAT_NEAR_BALL, ATTR_PLAYER_SPEED, ATTR_SHOOTING_RANGE, COLOR_GRASS, GRAPH_PLAYER_SIZE, \
+    STRAT_HOME_POS_SIZE
+from pitchObjects.homeposition import HomePosition
 from pitchObjects.pitchobject import PitchObject
 
 __author__ = 'Thomas'
 
 class FieldPlayer(PitchObject):
     """Class for players currently on the pitch"""
+
     def __init__(self, playerRole, team, ball, posX, posY):
         """
-        playerRole is a string ("gk", "lb", "cb", etc...)
+        playerRole is a tuple (giving the percent position)
         """
-        PitchObject.__init__(self, team.color, posX, posY)
+        PitchObject.__init__(self, team.color, posX, posY, GRAPH_PLAYER_SIZE)
+
+        self.homePosition = HomePosition(playerRole, team, ball)
+
         self.playerRole = playerRole
         self.team = team
-        self.shootingRange = STRAT_SHOOTINGRANGE
+
+        self.shootingRange = ATTR_SHOOTING_RANGE
         self.hasBall = False
         self.ball = ball
         self.isOffsides = False
@@ -21,7 +29,7 @@ class FieldPlayer(PitchObject):
         self.blocking = []
         self.isBlockedBy = []
         self.isCoveredBy = []
-        self.speed = float(ATTR_PLAYERSPEED)
+        self.speed = float(ATTR_PLAYER_SPEED)
 
     def isInShootingRange(self):
         if self.getWeightedDistanceToGoal(True) < self.shootingRange:
@@ -30,6 +38,7 @@ class FieldPlayer(PitchObject):
             return False
 
     def update(self, grandObserver):
+        self.homePosition.update()
         self.makeAction(grandObserver)
         self.confirmInBounds()
         PitchObject.update(self)
@@ -47,7 +56,11 @@ class FieldPlayer(PitchObject):
         if self.isInShootingRange():
             self.ball.simShot()
         else:
-            bestPassOption = self
+            if len(self.isCoveredBy) > 0:
+                if grandObserver.openPlayers:
+                    bestPassOption = grandObserver.openPlayers[0]
+            else:
+                bestPassOption = self
             for openPlayer in grandObserver.openPlayers:
                 if openPlayer.getDistanceToGoalline(True) < bestPassOption.getDistanceToGoalline(True):
                     bestPassOption = openPlayer
@@ -58,7 +71,7 @@ class FieldPlayer(PitchObject):
                 self.makeRun()
 
     def makeRun(self):
-        #TODO: Clean this up
+        # TODO: Clean this up
         if self.isOffsides:
             self.posX -= self.dirX(self.speed)
         else:
@@ -66,9 +79,10 @@ class FieldPlayer(PitchObject):
                 if self.nearBall():
                     self.chase(self.ball)
                 else:
-                    self.posX += self.dirX(self.speed)
+                    self.chase(self.homePosition)
             else:
-                self.posX += self.dirX(self.speed)
+                self.chase(self.homePosition)
+
 
     def defend(self):
         if self.nearBall():
@@ -76,22 +90,22 @@ class FieldPlayer(PitchObject):
         elif self.covering:
             self.chase(self.covering[0])
         else:
-            self.reposition()
+            self.chase(self.homePosition)
 
     def nearBall(self):
-        if self.squaredDistanceTo(self.ball) < STRAT_NEARBALL:
+        if self.squaredDistanceTo(self.ball) < STRAT_NEAR_BALL:
             return True
         else:
             return False
 
     def chase(self, pitchObject):
-        #TODO: eventually want to factor in dervatives of position
+        # TODO: eventually want to factor in dervatives of position
         difX = pitchObject.posX - self.posX
         difY = pitchObject.posY - self.posY
         dif = abs(difX) + abs(difY)
         if not dif == 0:
-            self.posX += self.dirX(float(difX)/dif * self.speed)
-            self.posY += float(difY)/dif * self.speed
+            self.posX += float(difX) / dif * self.speed
+            self.posY += float(difY) / dif * self.speed
 
     def reposition(self):
         if self.playerRole < 3 and self.ball.getDistanceToGoalline(False, self.team.isDefendingLeft) < \
@@ -112,7 +126,7 @@ class FieldPlayer(PitchObject):
             self.posY = 0
 
     def getWeightedDistanceToGoal(self, attacking):
-        return self.getDistanceToGoalline(attacking)*10 + (self.posY-FIELD_WIDTH/2)**2
+        return self.getDistanceToGoalline(attacking) * 10 + (self.posY - FIELD_WIDTH / 2) ** 2
 
     def getDistanceToGoalline(self, attacking):
         return PitchObject.getDistanceToGoalline(self, attacking, self.team.isDefendingLeft)

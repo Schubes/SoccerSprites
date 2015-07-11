@@ -1,16 +1,14 @@
 import pygame
 import math
-from gamevariables import FIELD_LENGTH, FIELD_WIDTH, COLOR_BALL, GAME_FPS, COLOR_PAINT, MECH_TURNSUNTOUCHABLE
+from display.displaymapper import FIELD_LENGTH, FIELD_WIDTH
+from gamevariables import COLOR_BALL, GAME_FPS, MECH_TURNS_UNTOUCHABLE, GRAPH_BALL_SIZE
 from pitchObjects.pitchobject import PitchObject
 
 __author__ = 'Thomas'
 
 class Ball(PitchObject):
     def __init__(self):
-        PitchObject.__init__(self, COLOR_BALL, self.getStartingPosX(), self.getStartingPosY())
-        self.image = pygame.Surface([20, 20])
-        self.image.fill(COLOR_BALL)
-        self.rect = self.image.get_rect()
+        PitchObject.__init__(self, COLOR_BALL, self.getStartingPosX(), self.getStartingPosY(), GRAPH_BALL_SIZE)
 
         self.closetDefender = self.getClosetDefender()
         self.possessor = None
@@ -74,7 +72,6 @@ class Ball(PitchObject):
         else:
             players = pygame.sprite.spritecollide(self, players, False)
             if players:
-                print "New Player?"
                 #remove possesion from previous team
                 if self.attackingTeam:
                     self.attackingTeam.hasPossession = False
@@ -86,7 +83,7 @@ class Ball(PitchObject):
                 self.attackingTeam = players[0].team
                 players[0].hasBall = True
                 players[0].team.hasPossession = True
-                self.turnsUntouchable = MECH_TURNSUNTOUCHABLE
+                self.turnsUntouchable = MECH_TURNS_UNTOUCHABLE
 
 
     def getClosetDefender(self):

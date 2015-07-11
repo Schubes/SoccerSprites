@@ -1,7 +1,6 @@
 import pygame
-from display.displaymapper import convertFieldPosition, convertYards2Pixels
-from gamevariables import COLOR_TEAM_BLUE, COLOR_TEAM_RED, WINDOW_HEADER_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, \
-    COLOR_GRASS, COLOR_PAINT, FIELD_LENGTH, FIELD_WIDTH, PAINT_WIDTH
+from display.displaymapper import convertFieldPosition, convertYards2Pixels, FIELD_LENGTH, FIELD_WIDTH, WINDOW_HEADER_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT
+from gamevariables import COLOR_TEAM_BLUE, COLOR_TEAM_RED, COLOR_GRASS, COLOR_PAINT, PAINT_WIDTH
 from grandobserver import GrandObserver
 from pitchObjects.ball import Ball
 from pitchObjects.fieldplayer import FieldPlayer

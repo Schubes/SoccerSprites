@@ -7,11 +7,11 @@ class GrandObserver:
     def __init__(self, team1, team2, ball):
         self.team1 = team1
         self.team2 = team2
+
         self.ball = ball
 
-        self.openPlayers = []
-
     def analyze(self):
+        #TODO: Break this function up
         if self.team1.hasPossession:
             attackingTeam = self.team1
             defendingTeam = self.team2
@@ -20,6 +20,9 @@ class GrandObserver:
             defendingTeam = self.team1
 
 
+        self.closestAttacker = attackingTeam.players[0]
+        self.closestDefender = defendingTeam.players[0]
+
         self.openPlayers = []
         lastDefender = defendingTeam.players[0]
         for defendingPlayer in defendingTeam.players:
@@ -27,6 +30,8 @@ class GrandObserver:
                 lastDefender = defendingPlayer
                 defendingPlayer.blocking = []
                 defendingPlayer.covering = []
+            if defendingPlayer.squaredDistanceTo(self.ball) < self.closestDefender.squaredDistanceTo(self.ball):
+                self.closestDefender = defendingPlayer
 
         for attackingPlayer in attackingTeam.players:
 
@@ -58,6 +63,8 @@ class GrandObserver:
                 attackingPlayer.isOffsides = False
             if not attackingPlayer.isOffsides:
                 self.openPlayers.append(attackingPlayer)
+            if attackingPlayer.squaredDistanceTo(self.ball) < self.closestAttacker.squaredDistanceTo(self.ball):
+                self.closestAttacker = attackingPlayer
 
 
     def attackerIsCloserToGoalline(self, attacker, defender):

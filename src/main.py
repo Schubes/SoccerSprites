@@ -1,6 +1,7 @@
 import pygame
 
-from gamevariables import WINDOW_WIDTH, WINDOW_HEIGHT, GAME_FPS
+from display.displaymapper import WINDOW_WIDTH, WINDOW_HEIGHT
+from gamevariables import GAME_FPS
 from match import Match
 from resources.FpsClock import FpsClock
 
