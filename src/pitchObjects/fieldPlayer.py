@@ -100,10 +100,14 @@ class FieldPlayer(PitchObject):
             pass
         elif self.marking:
             self.cover(self.marking)
+        elif self.marking:
+            self.chase(self.marking)
         elif not pygame.sprite.collide_rect(self, self.homePosition):
             self.chase(self.homePosition)
-        else:
+        elif self.getDistanceToGoalline(False) > 30:
             self.cover(self.ball)
+        else:
+            self.chase(self.ball)
 
     def nearBall(self):
         if self.squaredDistanceTo(self.ball) < STRAT_NEAR_BALL:

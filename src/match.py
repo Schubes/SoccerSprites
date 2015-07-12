@@ -24,9 +24,9 @@ class Match:
         self.nonPlayers.add(self.ball)
 
         self.allPlayers = pygame.sprite.LayeredDirty()
-        self.team1.setStartingLineUp((4, 4, 2), self.ball, window)
+        self.team1.setStartingLineUp((4, 1, 3, 2), self.ball, window)
         self.allPlayers.add(self.team1.players)
-        self.team2.setStartingLineUp((4, 3, 3), self.ball, window)
+        self.team2.setStartingLineUp((4, 1, 2, 1, 2), self.ball, window)
         self.allPlayers.add(self.team2.players)
 
         self.allObjects = pygame.sprite.LayeredDirty(self.allPlayers,self.nonPlayers)

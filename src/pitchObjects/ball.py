@@ -91,14 +91,37 @@ class Ball(PitchObject):
                 if len(players) > 1:
                     for player in players:
                         if player != self.possessor:
-                            if controlVal == 0:
-                                winningPlayer = player
-                            elif controlVal > 0:
-                                if player.team.isDefendingLeft:
+                            if self.possessor:
+                                if controlVal == 0:
                                     winningPlayer = player
+                                    break
+                                elif controlVal > 0 and self.possessor.team.isDefendingLeft:
+                                    winningPlayer = self.possessor
+                                    break
+                                elif controlVal > 0:
+                                    if player.team.isDefendingLeft:
+                                        winningPlayer = player
+                                        break
+                                elif controlVal < 0 and not self.possessor.team.isDefendingLeft:
+                                    winningPlayer = self.possessor
+                                    break
+                                else:
+                                    if not player.team.isDefendingLeft:
+                                        winningPlayer = player
+                                        break
                             else:
-                                if not player.team.isDefendingLeft:
+                                if controlVal == 0:
                                     winningPlayer = player
+                                elif controlVal > 0:
+                                    if player.team.isDefendingLeft:
+                                        winningPlayer = player
+                                        break
+                                else:
+                                    if not player.team.isDefendingLeft:
+                                        winningPlayer = player
+                                        break
+
+
                 else:
                     winningPlayer = players[0]
 
