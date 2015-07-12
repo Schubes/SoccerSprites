@@ -43,7 +43,7 @@ class GrandObserver:
         self.setOffsides(attackingTeam, lastDefender)
         self.setOpenPlayers(attackingTeam)
 
-        attackingTeam.players.sort(key=lambda x: x.getWeightedDistanceToGoal(True))
+        attackingTeam.players.sort(key=lambda x: x.getDistanceToGoalline(True))#x.getWeightedDistanceToGoal(True))
         for attackingPlayer in attackingTeam.players:
             for defendingPlayer in sorted(defendingTeam.players, key=lambda x: abs(x.posX - attackingPlayer.posX) + abs(x.posY - attackingPlayer.posY)):
                 if not defendingPlayer.marking and pygame.sprite.collide_rect(attackingPlayer, defendingPlayer.homePosition):

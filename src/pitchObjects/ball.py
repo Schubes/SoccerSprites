@@ -28,7 +28,7 @@ class Ball(PitchObject):
     def simShot(self, rightGoal):
         print "Shot Fired!"
 
-
+        self.possessor.team.hasPossession = False
         self.possessor.hasBall = False
         self.possessor = None
         self.isLoose = True
@@ -56,7 +56,7 @@ class Ball(PitchObject):
         self.velX = (player.posX - self.posX)/(abs(player.posY - self.posY) + abs(player.posX - self.posX)) * MECH_BALL_SPEED
         self.velY = (player.posY - self.posY)/(abs(player.posY - self.posY) + abs(player.posX - self.posX)) * MECH_BALL_SPEED
 
-    def update(self,players):
+    def update(self, players):
         self.moveBall()
         self.confirmInBounds()
         self.evaluateControl(players)

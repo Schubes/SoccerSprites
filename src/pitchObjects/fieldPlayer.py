@@ -60,10 +60,13 @@ class FieldPlayer(PitchObject):
             self.ball.simShot(self.team.isDefendingLeft)
         else:
             if grandObserver.openPlayers:
+                print len(grandObserver.openPlayers)
                 #this works because openPlayers is sorted by closeness to opponent's goal
                 bestPassOption = grandObserver.openPlayers[0]
-            if bestPassOption is not self:
-                self.ball.passTo(bestPassOption)
+                if bestPassOption is not self:
+                    self.ball.passTo(bestPassOption)
+                else:
+                    self.makeRun()
             else:
                 self.makeRun()
 
@@ -85,12 +88,12 @@ class FieldPlayer(PitchObject):
             self.chase(self.ball)
         elif self.marking:
             self.chase(self.marking)
+        elif not pygame.sprite.collide_rect(self, self.homePosition):
+            self.chase(self.homePosition)
         elif self.covering:
             self.chase(self.covering[0])
         elif self.blocking:
             self.chase(self.blocking[0])
-        elif not pygame.sprite.collide_rect(self, self.homePosition):
-            self.chase(self.homePosition)
         else: self.chase(self.ball)
         # else:
         #     self.chase(self.homePosition)
@@ -130,7 +133,7 @@ class FieldPlayer(PitchObject):
             self.posY = 0
 
     def getWeightedDistanceToGoal(self, attacking):
-        return self.getDistanceToGoalline(attacking) * 10 + (self.posY - FIELD_WIDTH / 2) ** 2
+        return self.getDistanceToGoalline(attacking) + abs(self.posY - FIELD_WIDTH / 2) * 2
 
     def getDistanceToGoalline(self, attacking):
         return PitchObject.getDistanceToGoalline(self, attacking, self.team.isDefendingLeft)
