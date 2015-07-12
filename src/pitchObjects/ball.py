@@ -33,6 +33,7 @@ class Ball(PitchObject):
         self.possessor.hasBall = False
         self.possessor = None
         self.isLoose = True
+        self.turnsUntouchable = 0
 
         goalY = FIELD_WIDTH/2
         if rightGoal:

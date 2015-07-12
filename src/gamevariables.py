@@ -13,15 +13,17 @@ COLOR_TEAL = (0, 120, 240)
 
 GRAPH_PLAYER_SIZE = [10, 10]
 GRAPH_BALL_SIZE = [15, 15]
+GRAPH_GOAL_SIZE = [convertYards2Pixels(8),1]
 
 PAINT_WIDTH = 3
 
 GAME_FPS = 30
 
-STRAT_HOME_POS_SIZE = [convertYards2Pixels(20), convertYards2Pixels(20)]
-STRAT_COVERAGE = 7**2 #Yards Squared
+STRAT_HOME_POS_SIZE = [convertYards2Pixels(25), convertYards2Pixels(25)]
+STRAT_COVERAGE = 5**2 #Yards Squared
 STRAT_BLOCKAGE = math.radians(20) #Theta difference in radians
 STRAT_NEAR_BALL = 12**2 #Yards Squared
+STRAT_MIN_PASS = 12
 
 ATTR_PLAYER_SPEED = float(10)/GAME_FPS
 ATTR_PLAYER_ACCEL = float(1)/GAME_FPS

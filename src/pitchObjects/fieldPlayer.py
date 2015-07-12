@@ -1,8 +1,10 @@
 import pygame
 from display.displaymapper import FIELD_LENGTH, FIELD_WIDTH
-from gamevariables import STRAT_NEAR_BALL, ATTR_PLAYER_SPEED, ATTR_SHOOTING_RANGE, GRAPH_PLAYER_SIZE, ATTR_PLAYER_ACCEL
+from gamevariables import STRAT_NEAR_BALL, ATTR_PLAYER_SPEED, ATTR_SHOOTING_RANGE, GRAPH_PLAYER_SIZE, ATTR_PLAYER_ACCEL, \
+    STRAT_MIN_PASS
 from pitchObjects.homeposition import HomePosition
 from pitchObjects.pitchobject import PitchObject
+import math
 
 __author__ = 'Thomas'
 
@@ -63,7 +65,13 @@ class FieldPlayer(PitchObject):
                 print len(grandObserver.openPlayers)
                 #this works because openPlayers is sorted by closeness to opponent's goal
                 # TODO: introduce some intelligent randomness
-                bestPassOption = grandObserver.openPlayers[0]
+                bestPassOption = self
+                for openPlayer in grandObserver.openPlayers:
+                    if openPlayer is self:
+                        break
+                    if math.sqrt((openPlayer.posY - self.posY)**2 + abs(openPlayer.posX - self.posX)**2) > STRAT_MIN_PASS:
+                        bestPassOption = openPlayer
+                        break
                 if bestPassOption is not self:
                     self.ball.passTo(bestPassOption)
                 else:
@@ -89,22 +97,28 @@ class FieldPlayer(PitchObject):
         if self.isClosestToBall or self.nearBall():
             self.chase(self.ball)
         elif self.marking:
-            self.chase(self.marking)
+            self.cover(self.marking)
         elif not pygame.sprite.collide_rect(self, self.homePosition):
             self.chase(self.homePosition)
-        elif self.covering:
-            self.chase(self.covering[0])
-        elif self.blocking:
-            self.chase(self.blocking[0])
-        else: self.chase(self.ball)
-        # else:
-        #     self.chase(self.homePosition)
+        else:
+            self.cover(self.ball)
 
     def nearBall(self):
         if self.squaredDistanceTo(self.ball) < STRAT_NEAR_BALL:
             return True
         else:
             return False
+
+    def cover(self, pitchObject):
+        if self.team.isDefendingLeft:
+            difX = pitchObject.posX - self.posX - 5
+        else:
+            difX = pitchObject.posX - self.posX + 5
+        difY = pitchObject.posY - self.posY
+        dif = abs(difX) + abs(difY)
+        if not dif == 0:
+            self.posX += float(difX) / dif * self.speed
+            self.posY += float(difY) / dif * self.speed
 
     def chase(self, pitchObject):
         # TODO: eventually want to factor in dervatives of position
@@ -114,14 +128,6 @@ class FieldPlayer(PitchObject):
         if not dif == 0:
             self.posX += float(difX) / dif * self.speed
             self.posY += float(difY) / dif * self.speed
-
-    #NOT USED
-    def reposition(self):
-        if self.playerRole < 3 and self.ball.getDistanceToGoalline(False, self.team.isDefendingLeft) < \
-                        self.getDistanceToGoalline(False) + 10:
-            self.posX -= self.dirX(self.speed)
-        elif self.isOffsides:
-            self.posX -= self.dirX(self.speed)
 
     def confirmInBounds(self):
         """keep players from running out of bounds"""

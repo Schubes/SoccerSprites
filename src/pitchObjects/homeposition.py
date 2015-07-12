@@ -28,9 +28,9 @@ class HomePosition(PitchObject):
     def ballModifierY(self):
         balltracking = (self.ball.posY - FIELD_WIDTH/2) * 2/3 * abs(self.defaultPosY - self.ball.posY)/FIELD_WIDTH
         if self.posX < 30:
-            overloadingBox = (FIELD_WIDTH/2 - self.defaultPosY)/(60/(30-self.posX))
+            overloadingBox = (FIELD_WIDTH/2 - self.defaultPosY)/(50/(30-self.posX))
         elif self.posX > 90:
-            overloadingBox = (FIELD_WIDTH/2 - self.defaultPosY)/(60/(self.posX-90))
+            overloadingBox = (FIELD_WIDTH/2 - self.defaultPosY)/(50/(self.posX-90))
         else:
             overloadingBox = 0
         return balltracking + overloadingBox
@@ -43,4 +43,7 @@ class HomePosition(PitchObject):
             else:
                 return self.defaultPosX - FIELD_LENGTH
         else:
-            return 0
+            if self.team.isDefendingLeft:
+                return self.defaultPosX/4
+            else:
+                return (self.defaultPosX - FIELD_LENGTH)/4
