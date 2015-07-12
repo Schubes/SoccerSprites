@@ -62,6 +62,7 @@ class FieldPlayer(PitchObject):
             if grandObserver.openPlayers:
                 print len(grandObserver.openPlayers)
                 #this works because openPlayers is sorted by closeness to opponent's goal
+                # TODO: introduce some intelligent randomness
                 bestPassOption = grandObserver.openPlayers[0]
                 if bestPassOption is not self:
                     self.ball.passTo(bestPassOption)
@@ -74,11 +75,12 @@ class FieldPlayer(PitchObject):
         if self.isOffsides:
             self.posX -= self.dirX(self.speed)
         else:
-            if self.ball.isLoose:
-                if self.nearBall():
-                    self.chase(self.ball)
-                else:
-                    self.chase(self.homePosition)
+            if self.ball.target is self:
+                self.chase(self.ball)
+            elif self.hasBall:
+                self.posX += self.dirX(self.speed)
+            elif self.ball.isLoose and pygame.sprite.collide_rect(self, self.homePosition):
+                self.chase(self.ball)
             else:
                 self.chase(self.homePosition)
 

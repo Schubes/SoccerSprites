@@ -64,7 +64,7 @@ class GrandObserver:
                 #Check blocked players
                 #if the defending player is anywhere between the attacker and the ball, run this to save tangent calculations
                 #TODO: use player attributes as modifiers
-                if self.ball.posX < defendingPlayer.posX < attackingPlayer.posX or self.ball.posX > defendingPlayer.posX > attackingPlayer.posX:
+                if self.ball.posX <= defendingPlayer.posX <= attackingPlayer.posX or self.ball.posX >= defendingPlayer.posX >= attackingPlayer.posX:
                     #if the defending player might be able to intercept
                     defendingAngle = math.atan2(self.ball.posX - defendingPlayer.posX, self.ball.posY - defendingPlayer.posY)
                     passingAngle = math.atan2(self.ball.posX - attackingPlayer.posX, self.ball.posY - attackingPlayer.posY)

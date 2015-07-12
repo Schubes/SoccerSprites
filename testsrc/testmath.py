@@ -16,17 +16,19 @@ class TestStringMethods(unittest.TestCase):
         self.team2 = Team(False, COLOR_TEAM_RED, "Red Team")
         self.ball = Ball()
         #first number is team num, second is player number
-        self.player11 = FieldPlayer([1,1], self.team1, self.ball, 30, 30)
+        self.player11 = FieldPlayer([1,1], self.team1, self.ball, 30, 0)
         self.player12 = FieldPlayer([2,1], self.team1, self.ball, 70, 30)
         self.player13 = FieldPlayer([2,2], self.team1, self.ball, 50, 50)
         self.player14 = FieldPlayer([1,2], self.team1, self.ball, 5, 75)
+        self.player15 = FieldPlayer([1,3], self.team1, self.ball, 30, 80)
 
-        self.team1.players = [self.player11, self.player12, self.player13, self.player14]
+        self.team1.players = [self.player11, self.player12, self.player13, self.player14, self.player15]
 
         self.player21 = FieldPlayer([1,2], self.team2, self.ball, 50, 30)
         self.player22 = FieldPlayer([1,1], self.team2, self.ball, 5+(30-5)/2, 30+(75-30)/2)
+        self.player23 = FieldPlayer([1,3], self.team2, self.ball, 30, 40)
 
-        self.team2.players = [self.player21, self.player22]
+        self.team2.players = [self.player21, self.player22, self.player23]
 
         self.ball.posX = 30
         self.ball.posY = 30
@@ -59,7 +61,7 @@ class TestStringMethods(unittest.TestCase):
         assert self.player11 in self.grandObserver.openPlayers
         assert self.player13 in self.grandObserver.openPlayers
         assert self.player14 not in self.grandObserver.openPlayers
-
+        assert self.player15 not in self.grandObserver.openPlayers
 
 if __name__ == '__main__':
     unittest.main()
