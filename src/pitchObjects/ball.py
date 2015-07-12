@@ -25,7 +25,7 @@ class Ball(PitchObject):
     def getStartingPosY(self):
         return FIELD_WIDTH/2
 
-    def simShot(self):
+    def simShot(self, rightGoal):
         print "Shot Fired!"
 
 
@@ -33,9 +33,14 @@ class Ball(PitchObject):
         self.possessor = None
         self.isLoose = True
 
-        #TODO: make the players kick a bit harder
-        self.posX = self.posX
-        self.posY = self.posY
+        goalY = FIELD_WIDTH/2
+        if rightGoal:
+            goalX = FIELD_LENGTH
+        else:
+            goalX = 0
+
+        self.velX = (goalX - self.posX)/(abs(goalY - self.posY) + abs(goalX - self.posX)) * MECH_BALL_SPEED
+        self.velY = (goalY - self.posY)/(abs(goalY - self.posY) + abs(goalX - self.posX)) * MECH_BALL_SPEED
 
     def passTo(self, player):
         assert self.possessor is not None

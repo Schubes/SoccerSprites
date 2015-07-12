@@ -26,6 +26,7 @@ class FieldPlayer(PitchObject):
         self.isOffsides = False
         self.covering = []
         self.blocking = []
+        self.marking = None
         self.isBlockedBy = []
         self.isCoveredBy = []
         self.isClosestToBall = False
@@ -56,25 +57,17 @@ class FieldPlayer(PitchObject):
 
     def makePlay(self, grandObserver):
         if self.isInShootingRange():
-            self.ball.simShot()
+            self.ball.simShot(self.team.isDefendingLeft)
         else:
-            if len(self.isCoveredBy) > 0:
-                if grandObserver.openPlayers:
-                    bestPassOption = grandObserver.openPlayers[0]
-            else:
-                bestPassOption = self
-            print len(grandObserver.openPlayers)
-            for openPlayer in grandObserver.openPlayers:
-                if openPlayer.getDistanceToGoalline(True) < bestPassOption.getDistanceToGoalline(True):
-                    bestPassOption = openPlayer
-
+            if grandObserver.openPlayers:
+                #this works because openPlayers is sorted by closeness to opponent's goal
+                bestPassOption = grandObserver.openPlayers[0]
             if bestPassOption is not self:
                 self.ball.passTo(bestPassOption)
             else:
                 self.makeRun()
 
     def makeRun(self):
-        # TODO: Clean this up
         if self.isOffsides:
             self.posX -= self.dirX(self.speed)
         else:
@@ -88,15 +81,15 @@ class FieldPlayer(PitchObject):
 
 
     def defend(self):
-        if self.isClosestToBall:
+        if self.isClosestToBall or self.nearBall():
             self.chase(self.ball)
-        elif self.nearBall():
-            self.chase(self.ball)
+        elif self.marking:
+            self.chase(self.marking)
         elif self.covering:
             self.chase(self.covering[0])
         elif self.blocking:
             self.chase(self.blocking[0])
-        elif not pygame.sprite.collide_rect(self, self.ball):
+        elif not pygame.sprite.collide_rect(self, self.homePosition):
             self.chase(self.homePosition)
         else: self.chase(self.ball)
         # else:
