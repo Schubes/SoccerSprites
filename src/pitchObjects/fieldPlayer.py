@@ -53,7 +53,7 @@ class FieldPlayer(PitchObject):
             if self.hasBall:
                 self.makePlay(grandObserver)
             else:
-                self.makeRun()
+                self.makeRun(grandObserver)
         else:
             self.defend()
 
@@ -75,11 +75,11 @@ class FieldPlayer(PitchObject):
                 if bestPassOption is not self:
                     self.ball.passTo(bestPassOption)
                 else:
-                    self.makeRun()
+                    self.makeRun(grandObserver)
             else:
-                self.makeRun()
+                self.makeRun(grandObserver)
 
-    def makeRun(self):
+    def makeRun(self, grandObserver):
         if self.isOffsides:
             self.posX -= self.dirX(self.speed)
         else:
@@ -96,6 +96,8 @@ class FieldPlayer(PitchObject):
     def defend(self):
         if self.isClosestToBall or self.nearBall():
             self.chase(self.ball)
+        elif self.marking and self.getDistanceToGoalline(False) < 30:
+            pass
         elif self.marking:
             self.cover(self.marking)
         elif not pygame.sprite.collide_rect(self, self.homePosition):

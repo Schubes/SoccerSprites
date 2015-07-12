@@ -13,7 +13,6 @@ class GrandObserver:
         self.ball = ball
 
     def analyze(self):
-        #TODO: Break this function up
         if self.team1.hasPossession:
             attackingTeam = self.team1
             defendingTeam = self.team2
@@ -21,39 +20,37 @@ class GrandObserver:
             attackingTeam = self.team2
             defendingTeam = self.team1
 
-        closestDefender = defendingTeam.players[0]
-
-        self.openPlayers = []
-        lastDefender = defendingTeam.players[0]
-        for defendingPlayer in defendingTeam.players:
-
-            defendingPlayer.blocking = []
-            defendingPlayer.covering = []
-            defendingPlayer.isClosestToBall = False
-            defendingPlayer.marking = None
-
-            if defendingPlayer.getDistanceToGoalline(False) < lastDefender.getDistanceToGoalline(False):
-                lastDefender = defendingPlayer
-            if defendingPlayer.squaredDistanceTo(self.ball) < closestDefender.squaredDistanceTo(self.ball):
-                closestDefender = defendingPlayer
-
-        closestDefender.isClosestToBall = True
-
+        self.findClosestandLastDefenders(defendingTeam)
         self.setCoveredAndBlockedPlayers(attackingTeam, defendingTeam)
-        self.setOffsides(attackingTeam, lastDefender)
+        self.setOffsides(attackingTeam)
         self.setOpenPlayers(attackingTeam)
+        self.setMarkings(attackingTeam, defendingTeam)
 
-        attackingTeam.players.sort(key=lambda x: x.getDistanceToGoalline(True))#x.getWeightedDistanceToGoal(True))
+    def setMarkings(self, attackingTeam, defendingTeam):
+        attackingTeam.players.sort(key=lambda x: x.getDistanceToGoalline(True))
         for attackingPlayer in attackingTeam.players:
             for defendingPlayer in sorted(defendingTeam.players, key=lambda x: abs(x.posX - attackingPlayer.posX) + abs(x.posY - attackingPlayer.posY)):
                 if not defendingPlayer.marking and pygame.sprite.collide_rect(attackingPlayer, defendingPlayer.homePosition):
                     defendingPlayer.marking = attackingPlayer
                     break
 
+    def findClosestandLastDefenders(self, defendingTeam):
+        closestDefender = defendingTeam.players[0]
+        self.openPlayers = []
+        self.lastDefender = defendingTeam.players[0]
+        for defendingPlayer in defendingTeam.players:
+            defendingPlayer.blocking = []
+            defendingPlayer.covering = []
+            defendingPlayer.isClosestToBall = False
+            defendingPlayer.marking = None
 
+            if defendingPlayer.getDistanceToGoalline(False) < self.lastDefender.getDistanceToGoalline(False):
+                self.lastDefender = defendingPlayer
+            if defendingPlayer.squaredDistanceTo(self.ball) < closestDefender.squaredDistanceTo(self.ball):
+                closestDefender = defendingPlayer
 
-            # if attackingPlayer.squaredDistanceTo(self.ball) < closestAttacker.squaredDistanceTo(self.ball):
-            #     closestAttacker = attackingPlayer
+        closestDefender.isClosestToBall = True
+
 
     def setCoveredAndBlockedPlayers(self, attackingTeam, defendingTeam):
         for attackingPlayer in attackingTeam.players:
@@ -79,12 +76,12 @@ class GrandObserver:
                         attackingPlayer.coveredBy += [defendingPlayer]
                         defendingPlayer.covering += [attackingPlayer]
 
-    def setOffsides(self, attackingTeam, lastDefender):
+    def setOffsides(self, attackingTeam):
         for attackingPlayer in attackingTeam.players:
             if not self.ball.isLoose:
                 attackingPlayer.isOffsides = False
                 if attackingPlayer.getDistanceToGoalline(True) < FIELD_WIDTH/2:
-                    if self.attackerIsCloserToGoalline(attackingPlayer, lastDefender):
+                    if self.attackerIsCloserToGoalline(attackingPlayer, self.lastDefender):
                         if self.ball.possessor and attackingPlayer.getDistanceToGoalline(True) < self.ball.possessor.getDistanceToGoalline(True):
                             attackingPlayer.isOffsides = True
                         elif not self.ball.possessor:
