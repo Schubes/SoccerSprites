@@ -20,7 +20,7 @@ GAME_FPS = 30
 
 STRAT_HOME_POS_SIZE = [convertYards2Pixels(30), convertYards2Pixels(30)]
 STRAT_COVERAGE = 7**2 #Yards Squared
-STRAT_BLOCKAGE = math.radians(5) #Theta difference in radians
+STRAT_BLOCKAGE = math.radians(20) #Theta difference in radians
 STRAT_NEAR_BALL = 12**2 #Yards Squared
 
 ATTR_PLAYER_SPEED = float(10)/GAME_FPS

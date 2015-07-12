@@ -66,8 +66,10 @@ class GrandObserver:
                 #TODO: use player attributes as modifiers
                 if self.ball.posX < defendingPlayer.posX < attackingPlayer.posX or self.ball.posX > defendingPlayer.posX > attackingPlayer.posX:
                     #if the defending player might be able to intercept
-                    if (math.atan2(self.ball.posX - defendingPlayer.posX, self.ball.posY - defendingPlayer.posY) -
-                            math.atan2(self.ball.posX - attackingPlayer.posX, self.ball.posY - attackingPlayer.posY)) % (2*math.pi) < STRAT_BLOCKAGE:
+                    defendingAngle = math.atan2(self.ball.posX - defendingPlayer.posX, self.ball.posY - defendingPlayer.posY)
+                    passingAngle = math.atan2(self.ball.posX - attackingPlayer.posX, self.ball.posY - attackingPlayer.posY)
+                    angleDif = abs(((defendingAngle - passingAngle + math.pi) % (2*math.pi)) - math.pi)
+                    if angleDif < STRAT_BLOCKAGE:
                         attackingPlayer.blockedBy += [defendingPlayer]
                         defendingPlayer.blocking += [attackingPlayer]
 
