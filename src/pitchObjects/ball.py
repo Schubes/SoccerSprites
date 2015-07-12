@@ -81,7 +81,13 @@ class Ball(PitchObject):
                         self.possessor.hasBall = False
 
                 #select the first player who touched the ball
-                self.possessor = players[0]
+                if len(players) > 1:
+                    if players[0] == self.possessor:
+                        self.possessor = players[1]
+                    else:
+                        self.possessor = players[0]
+                else:
+                    self.possessor = players[0]
                 #set new possesion
                 self.isLoose = False
                 self.attackingTeam = players[0].team

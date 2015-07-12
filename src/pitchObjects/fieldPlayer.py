@@ -90,15 +90,14 @@ class FieldPlayer(PitchObject):
     def defend(self):
         if self.isClosestToBall:
             self.chase(self.ball)
-        elif not pygame.sprite.collide_rect(self, self.ball):
-            self.chase(self.homePosition)
         elif self.nearBall():
             self.chase(self.ball)
         elif self.covering:
-            print "covering"
             self.chase(self.covering[0])
         elif self.blocking:
             self.chase(self.blocking[0])
+        elif not pygame.sprite.collide_rect(self, self.ball):
+            self.chase(self.homePosition)
         else: self.chase(self.ball)
         # else:
         #     self.chase(self.homePosition)
