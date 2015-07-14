@@ -9,8 +9,8 @@ __author__ = 'Thomas'
 class Ball(PitchObject):
     def __init__(self):
         PitchObject.__init__(self, COLOR_BALL, self.getStartingPosX(), self.getStartingPosY(), GRAPH_BALL_SIZE)
+        self.image.set_alpha(255)
 
-        self.closetDefender = self.getClosetDefender()
         self.possessor = None
         self.attackingTeam = None
         self.isLoose = True
@@ -58,7 +58,7 @@ class Ball(PitchObject):
 
     def update(self, players):
         self.moveBall()
-        self.confirmInBounds()
+        self.checkOutOfBounds()
         self.evaluateControl(players)
         PitchObject.update(self)
 
@@ -137,20 +137,21 @@ class Ball(PitchObject):
                 self.attackingTeam.hasPossession = True
                 self.turnsUntouchable = MECH_TURNS_UNTOUCHABLE
 
-    def confirmInBounds(self):
+    def checkOutOfBounds(self):
         """keep players from running out of bounds"""
-        if self.posX > FIELD_LENGTH:
-            self.posX = FIELD_LENGTH
-        if self.posX < 0:
-            self.posX = 0
-        if self.posY > FIELD_WIDTH:
-            self.posY = FIELD_WIDTH
-        if self.posY < 0:
-            self.posY = 0
+        if self.posX > FIELD_LENGTH + self.rect.width:
+            self.posX = FIELD_LENGTH + self.rect.width/2
+            self.outOfBounds()
+        if self.posX < 0 - self.rect.width:
+            self.posX = 0 - self.rect.width/2
+            self.outOfBounds()
+        if self.posY > FIELD_WIDTH + self.rect.height:
+            self.posY = FIELD_WIDTH + self.rect.height/2
+            self.outOfBounds()
+        if self.posY < 0 - self.rect.height:
+            self.posY = 0 - self.rect.height/2
+            self.outOfBounds()
 
-
-    def getClosetDefender(self):
-        pass
-
-    def getPossesor(self):
-        pass
+    def outOfBounds(self):
+        self.velX = 0
+        self.velY = 0

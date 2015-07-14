@@ -1,5 +1,5 @@
 from display.displaymapper import FIELD_LENGTH, FIELD_WIDTH
-from gamevariables import COLOR_BALL
+from gamevariables import COLOR_BALL, GRAPH_GOAL_SIZE
 
 __author__ = 'Thomas'
 
