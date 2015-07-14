@@ -12,7 +12,7 @@ class HomePosition(PitchObject):
         self.perX = playerRole[0]
         self.perY = playerRole[1]
 
-        self.defaultPosX = (self.relX(self.perX * FIELD_LENGTH/2, self.team))
+        self.defaultPosX = (self.relX(self.perX * FIELD_LENGTH/2, self.team.isDefendingLeft))
         self.defaultPosY = self.perY * FIELD_WIDTH
 
         PitchObject.__init__(self, COLOR_ORANGE, self.defaultPosX, self.defaultPosY, STRAT_HOME_POS_SIZE)

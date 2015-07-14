@@ -17,9 +17,6 @@ class Ball(PitchObject):
         self.target = True
         self.turnsUntouchable = 0
 
-        self.velX = 0
-        self.velY = 0
-
     def getStartingPosX(self):
         return FIELD_LENGTH/2
 
@@ -73,8 +70,7 @@ class Ball(PitchObject):
             self.velX = 0
             self.velY = 0
         else:
-            self.posX += self.velX / GAME_FPS
-            self.posY += self.velY / GAME_FPS
+            PitchObject.move(self)
 
     def evaluateControl(self, players):
         if self.turnsUntouchable > 0:

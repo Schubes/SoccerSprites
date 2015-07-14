@@ -33,7 +33,8 @@ class FieldPlayer(PitchObject):
         self.isCoveredBy = []
         self.isClosestToBall = False
         self.speed = float(ATTR_PLAYER_SPEED)
-        self.acceleration = ATTR_PLAYER_ACCEL
+        self.acceleration = float(ATTR_PLAYER_ACCEL)
+
 
     def isInShootingRange(self):
         if self.getWeightedDistanceToGoal(True) < self.shootingRange:
@@ -44,9 +45,25 @@ class FieldPlayer(PitchObject):
     def update(self, grandObserver):
         self.homePosition.update()
         self.makeAction(grandObserver)
-        # self.move()
-        self.confirmInBounds()
+        self.move()
         PitchObject.update(self)
+
+    def accelerate(self, vectX, vectY):
+        vectMag = math.sqrt(vectX**2 + vectY**2)
+        vectX = self.speed * vectX / vectMag
+        vectY = self.speed * vectY / vectMag
+        vectMag = math.sqrt((vectX - self.velX)**2 + (vectY - self.velY)**2)
+        if vectMag > 0:
+            self.velX += (vectX - self.velX) * self.acceleration
+            self.velY += (vectY - self.velY) * self.acceleration
+
+
+    def move(self):
+        #Players can't move at the speed of rocket ships.
+        if math.sqrt(self.velY**2 + self.velX**2) > self.speed:
+            self.velX = self.speed * self.velX/math.sqrt(self.velY**2 + self.velX**2)
+            self.velY = self.speed * self.velY/math.sqrt(self.velY**2 + self.velX**2)
+        PitchObject.move(self)
 
     def makeAction(self, grandObserver):
         if self.team.hasPossession:
@@ -63,7 +80,7 @@ class FieldPlayer(PitchObject):
         else:
             if grandObserver.openPlayers:
                 print len(grandObserver.openPlayers)
-                #this works because openPlayers is sorted by closeness to opponent's goal
+                #this works because openPlayers is sorted by closeness to opponent's goalline
                 # TODO: introduce some intelligent randomness
                 bestPassOption = self
                 for openPlayer in grandObserver.openPlayers:
@@ -80,13 +97,13 @@ class FieldPlayer(PitchObject):
                 self.makeRun(grandObserver)
 
     def makeRun(self, grandObserver):
-        if self.isOffsides:
-            self.posX -= self.dirX(self.speed)
+        if self.getDistanceToGoalline(True) < grandObserver.lastDefender.getDistanceToGoalline(False):
+            self.accelerate( -self.dirX(1), 0)
         else:
             if self.ball.target is self:
                 self.chase(self.ball)
             elif self.hasBall:
-                self.posX += self.dirX(self.speed)
+                self.accelerate( self.dirX(1), 0)
             elif self.ball.isLoose and pygame.sprite.collide_rect(self, self.homePosition):
                 self.chase(self.ball)
             else:
@@ -96,8 +113,9 @@ class FieldPlayer(PitchObject):
     def defend(self):
         if self.isClosestToBall or self.nearBall():
             self.chase(self.ball)
-        elif self.marking and self.getDistanceToGoalline(False) < 30:
-            pass
+        elif self.marking and self.getDistanceToGoalline(False) < 30 and \
+                self.getDistanceToGoalline(False) < self.ball.getDistanceToGoalline(False, self.team.isDefendingLeft):
+            self.accelerate(0, self.marking.posY - self.posY)
         elif self.marking:
             self.cover(self.marking)
         elif self.marking:
@@ -123,8 +141,7 @@ class FieldPlayer(PitchObject):
         difY = pitchObject.posY - self.posY
         dif = abs(difX) + abs(difY)
         if not dif == 0:
-            self.posX += float(difX) / dif * self.speed
-            self.posY += float(difY) / dif * self.speed
+            self.accelerate(float(difX) / dif, float(difY) / dif)
 
     def chase(self, pitchObject):
         # TODO: eventually want to factor in dervatives of position
@@ -132,8 +149,7 @@ class FieldPlayer(PitchObject):
         difY = pitchObject.posY - self.posY
         dif = abs(difX) + abs(difY)
         if not dif == 0:
-            self.posX += float(difX) / dif * self.speed
-            self.posY += float(difY) / dif * self.speed
+            self.accelerate(float(difX) / dif, float(difY) / dif)
 
     def confirmInBounds(self):
         """keep players from running out of bounds"""

@@ -1,5 +1,6 @@
 import pygame
 from display.displaymapper import convertFieldPosition, FIELD_LENGTH
+from gamevariables import GAME_FPS
 
 __author__ = 'Thomas'
 
@@ -19,11 +20,18 @@ class PitchObject(pygame.sprite.DirtySprite):
 
         self.posX = posX
         self.posY = posY
+        self.velX = 0
+        self.velY = 0
+
         self.color = color
         self.dirty = 2
 
     def update(self):
         self.rect.center = convertFieldPosition(self.posX, self.posY)
+
+    def move(self):
+        self.posX += self.velX / GAME_FPS
+        self.posY += self.velY / GAME_FPS
 
     def getDistanceToGoalline(self, attacking, isDefendingLeft):
         if isDefendingLeft and not attacking:
@@ -36,8 +44,8 @@ class PitchObject(pygame.sprite.DirtySprite):
     def squaredDistanceTo(self, pitchObject):
         return ((self.posX - pitchObject.posX)**2) + ((self.posY - pitchObject.posY)**2)
 
-    def relX(self, posX, team):
-        if team.isDefendingLeft:
+    def relX(self, posX, defendingLeft):
+        if defendingLeft:
             return posX
         else:
             return FIELD_LENGTH - posX
