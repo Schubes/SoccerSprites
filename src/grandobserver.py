@@ -20,6 +20,9 @@ class GrandObserver:
             attackingTeam = self.team2
             defendingTeam = self.team1
 
+        attackingTeam.players.sort(key=lambda x: x.getDistanceToGoalline(True))
+        defendingTeam.players.sort(key=lambda x: x.getDistanceToGoalline(False))
+
         self.findClosestandLastDefenders(defendingTeam)
         self.setCoveredAndBlockedPlayers(attackingTeam, defendingTeam)
         self.setOffsides(attackingTeam)
@@ -27,7 +30,6 @@ class GrandObserver:
         self.setMarkings(attackingTeam, defendingTeam)
 
     def setMarkings(self, attackingTeam, defendingTeam):
-        attackingTeam.players.sort(key=lambda x: x.getDistanceToGoalline(True))
         for attackingPlayer in attackingTeam.players:
             for defendingPlayer in sorted(defendingTeam.players, key=lambda x: abs(x.posX - attackingPlayer.posX) + abs(x.posY - attackingPlayer.posY)):
                 if not defendingPlayer.marking and pygame.sprite.collide_rect(attackingPlayer, defendingPlayer.homePosition):
@@ -36,20 +38,25 @@ class GrandObserver:
 
     def findClosestandLastDefenders(self, defendingTeam):
         closestDefender = defendingTeam.players[0]
+        stoppingPlayer = defendingTeam.players[0]
         self.openPlayers = []
         self.lastDefender = defendingTeam.players[0]
         for defendingPlayer in defendingTeam.players:
             defendingPlayer.blocking = []
             defendingPlayer.covering = []
-            defendingPlayer.isClosestToBall = False
+            defendingPlayer.chargeToBall = False
             defendingPlayer.marking = None
 
             if defendingPlayer.getDistanceToGoalline(False) < self.lastDefender.getDistanceToGoalline(False):
                 self.lastDefender = defendingPlayer
             if defendingPlayer.squaredDistanceTo(self.ball) < closestDefender.squaredDistanceTo(self.ball):
                 closestDefender = defendingPlayer
+            if defendingPlayer.getDistanceToGoalline(False) < self.ball.getDistanceToGoalline(False, defendingPlayer.team.isDefendingLeft):
+                if defendingPlayer.squaredDistanceTo(self.ball) < closestDefender.squaredDistanceTo(self.ball):
+                    stoppingPlayer = defendingPlayer
 
-        closestDefender.isClosestToBall = True
+        closestDefender.chargeToBall = True
+        stoppingPlayer.chargeToBall = True
 
 
     def setCoveredAndBlockedPlayers(self, attackingTeam, defendingTeam):

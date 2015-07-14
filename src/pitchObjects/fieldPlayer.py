@@ -31,7 +31,7 @@ class FieldPlayer(PitchObject):
         self.marking = None
         self.isBlockedBy = []
         self.isCoveredBy = []
-        self.isClosestToBall = False
+        self.chargeToBall = False
         self.speed = float(ATTR_PLAYER_SPEED)
         self.acceleration = float(ATTR_PLAYER_ACCEL)
 
@@ -111,7 +111,7 @@ class FieldPlayer(PitchObject):
 
 
     def defend(self):
-        if self.isClosestToBall or self.nearBall():
+        if self.chargeToBall or self.nearBall():
             self.chase(self.ball)
         elif self.marking and self.getDistanceToGoalline(False) < 30 and \
                 self.getDistanceToGoalline(False) < self.ball.getDistanceToGoalline(False, self.team.isDefendingLeft):
