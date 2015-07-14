@@ -1,11 +1,13 @@
 from display.displaymapper import FIELD_LENGTH, FIELD_WIDTH
 from pitchObjects.fieldplayer import FieldPlayer
+from pitchObjects.goal import Goal
 
 __author__ = 'Thomas'
 
 class Team:
-    def __init__(self,isDefendingLeft, color, name):
+    def __init__(self, isDefendingLeft, color, name):
         self.isDefendingLeft = isDefendingLeft
+        self.goal = Goal(isDefendingLeft)
         self.hasPossession = isDefendingLeft
         self.color = color
         self.players = []

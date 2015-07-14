@@ -101,7 +101,8 @@ class FieldPlayer(PitchObject):
                 self.makeRun(grandObserver)
 
     def makeRun(self, grandObserver):
-        if self.getDistanceToGoalline(True) < grandObserver.lastDefender.getDistanceToGoalline(False):
+        if grandObserver.lastDefender.getDistanceToGoalline(False) > self.getDistanceToGoalline(True) \
+                < self.ball.getDistanceToGoalline(True, self.team.isDefendingLeft):
             self.accelerate( -self.dirX(1), 0)
         else:
             if self.ball.target is self:

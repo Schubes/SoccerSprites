@@ -33,9 +33,9 @@ class HomePosition(PitchObject):
             overloadingBox = (FIELD_WIDTH/2 - self.defaultPosY)/(50/(self.posX-90))
         else:
             if self.posX > FIELD_LENGTH/2:
-                overloadingBox = (FIELD_WIDTH/2 - self.defaultPosY)/(100/(self.posX + 1 - FIELD_LENGTH))
+                overloadingBox = (FIELD_WIDTH/2 - self.defaultPosY)/(100/(self.posX + 1 - FIELD_LENGTH))/2
             else:
-                overloadingBox = (FIELD_WIDTH/2 - self.defaultPosY)/(100/(self.posX + 1))
+                overloadingBox = (FIELD_WIDTH/2 - self.defaultPosY)/(100/(self.posX + 1))/2
         return balltracking + overloadingBox
 
 

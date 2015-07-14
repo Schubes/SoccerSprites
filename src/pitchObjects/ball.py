@@ -1,7 +1,7 @@
 import pygame
 import math
 from display.displaymapper import FIELD_LENGTH, FIELD_WIDTH
-from gamevariables import COLOR_BALL, GAME_FPS, MECH_TURNS_UNTOUCHABLE, GRAPH_BALL_SIZE, MECH_BALL_SPEED
+from gamevariables import COLOR_BALL, GAME_FPS, MECH_TURNS_UNTOUCHABLE, GRAPH_BALL_SIZE, MECH_BALL_SPEED, MECH_BALL_SIZE
 from pitchObjects.pitchobject import PitchObject
 
 __author__ = 'Thomas'
@@ -139,17 +139,17 @@ class Ball(PitchObject):
 
     def checkOutOfBounds(self):
         """keep players from running out of bounds"""
-        if self.posX > FIELD_LENGTH + self.rect.width:
-            self.posX = FIELD_LENGTH + self.rect.width/2
+        if self.posX > FIELD_LENGTH + MECH_BALL_SIZE:
+            self.posX = FIELD_LENGTH + MECH_BALL_SIZE
             self.outOfBounds()
-        if self.posX < 0 - self.rect.width:
-            self.posX = 0 - self.rect.width/2
+        if self.posX < 0 - MECH_BALL_SIZE:
+            self.posX = 0 - MECH_BALL_SIZE
             self.outOfBounds()
-        if self.posY > FIELD_WIDTH + self.rect.height:
-            self.posY = FIELD_WIDTH + self.rect.height/2
+        if self.posY > FIELD_WIDTH + MECH_BALL_SIZE:
+            self.posY = FIELD_WIDTH + MECH_BALL_SIZE
             self.outOfBounds()
-        if self.posY < 0 - self.rect.height:
-            self.posY = 0 - self.rect.height/2
+        if self.posY < 0 - MECH_BALL_SIZE:
+            self.posY = 0 - MECH_BALL_SIZE
             self.outOfBounds()
 
     def outOfBounds(self):
