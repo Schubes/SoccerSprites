@@ -52,10 +52,13 @@ class FieldPlayer(PitchObject):
         vectMag = math.sqrt(vectX**2 + vectY**2)
         vectX = self.speed * vectX / vectMag
         vectY = self.speed * vectY / vectMag
-        vectMag = math.sqrt((vectX - self.velX)**2 + (vectY - self.velY)**2)
-        if vectMag > 0:
-            self.velX += (vectX - self.velX) * self.acceleration
-            self.velY += (vectY - self.velY) * self.acceleration
+
+        difX = (vectX - self.velX)
+        difY = (vectY - self.velY)
+        difMag = math.sqrt((vectX - self.velX)**2 + (vectY - self.velY)**2)
+        if difMag > 0:
+            self.velX += difX/difMag * self.acceleration
+            self.velY += difY/difMag * self.acceleration
 
 
     def move(self):
@@ -90,6 +93,7 @@ class FieldPlayer(PitchObject):
                         bestPassOption = openPlayer
                         break
                 if bestPassOption is not self:
+                    print "Passing"
                     self.ball.passTo(bestPassOption)
                 else:
                     self.makeRun(grandObserver)
@@ -139,17 +143,17 @@ class FieldPlayer(PitchObject):
         else:
             difX = pitchObject.posX - self.posX + 5
         difY = pitchObject.posY - self.posY
-        dif = abs(difX) + abs(difY)
-        if not dif == 0:
-            self.accelerate(float(difX) / dif, float(difY) / dif)
+        difMag = abs(difX) + abs(difY)
+        if difMag > 0:
+            self.accelerate(float(difX) / difMag, float(difY) / difMag)
 
     def chase(self, pitchObject):
         # TODO: eventually want to factor in dervatives of position
         difX = pitchObject.posX - self.posX
         difY = pitchObject.posY - self.posY
-        dif = abs(difX) + abs(difY)
-        if not dif == 0:
-            self.accelerate(float(difX) / dif, float(difY) / dif)
+        difMag = abs(difX) + abs(difY)
+        if difMag > 0:
+            self.accelerate(float(difX) / difMag, float(difY) / difMag)
 
     def confirmInBounds(self):
         """keep players from running out of bounds"""
