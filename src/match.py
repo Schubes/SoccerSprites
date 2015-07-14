@@ -20,17 +20,16 @@ class Match:
         self.team1 = Team(True, COLOR_TEAM_BLUE, "Blue Team")
         self.team2 = Team(False, COLOR_TEAM_RED, "Red Team")
 
-        self.nonPlayers = pygame.sprite.LayeredDirty()
         self.ball = Ball()
-        self.nonPlayers.add(self.ball)
+        self.ballGroup = pygame.sprite.LayeredDirty(self.ball)
 
         self.allPlayers = pygame.sprite.LayeredDirty()
         self.team1.setStartingLineUp((2, 3, 3, 2), self.ball, window)
         self.allPlayers.add(self.team1.players)
-        self.team2.setStartingLineUp((4, 1, 2, 1, 2), self.ball, window)
+        self.team2.setStartingLineUp((1,1,1), self.ball, window)
         self.allPlayers.add(self.team2.players)
 
-        self.allObjects = pygame.sprite.LayeredDirty(self.allPlayers,self.nonPlayers)
+        self.allObjects = pygame.sprite.LayeredDirty(self.allPlayers, self.ballGroup, self.team1.goal, self.team2.goal)
         self.allObjects.move_to_back(self.ball)
 
         self.ball.posX = 30
@@ -42,7 +41,7 @@ class Match:
     def playMatchTurn(self):
         self.grandObserver.analyze()
         self.allPlayers.update(self.grandObserver)
-        self.nonPlayers.update(self.allPlayers)
+        self.ballGroup.update(self.allPlayers)
         self.allObjects.draw(self.pitchSurface)
         self.allObjects.clear(self.pitchSurface, self.fieldBackground)
         self.window.blit(self.pitchSurface, (0, WINDOW_HEADER_HEIGHT))
@@ -67,7 +66,7 @@ class Match:
 
         centerOfGoalLine = convertFieldPosition(0, FIELD_WIDTH/2)
 
-        sixYardBox = pygame.Rect(centerOfGoalLine[0], (centerOfGoalLine[1] - convertYards2Pixels(14)), convertYards2Pixels(6), convertYards2Pixels(28))
+        sixYardBox = pygame.Rect(centerOfGoalLine[0], (centerOfGoalLine[1] - convertYards2Pixels(10)), convertYards2Pixels(6), convertYards2Pixels(20))
         pygame.draw.rect(pitchSurface, COLOR_PAINT, sixYardBox, PAINT_WIDTH)
 
         plenaltyBox = pygame.Rect(centerOfGoalLine[0], (centerOfGoalLine[1] - convertYards2Pixels(22)), convertYards2Pixels(18), convertYards2Pixels(44))
@@ -78,7 +77,7 @@ class Match:
 
         centerOfGoalLine = convertFieldPosition(FIELD_LENGTH, FIELD_WIDTH/2)
 
-        sixYardBox = pygame.Rect((centerOfGoalLine[0] - convertYards2Pixels(6)) , (centerOfGoalLine[1] - convertYards2Pixels(14)), convertYards2Pixels(6), convertYards2Pixels(28))
+        sixYardBox = pygame.Rect((centerOfGoalLine[0] - convertYards2Pixels(6)) , (centerOfGoalLine[1] - convertYards2Pixels(10)), convertYards2Pixels(6), convertYards2Pixels(20))
         pygame.draw.rect(pitchSurface, COLOR_PAINT, sixYardBox, PAINT_WIDTH)
 
         plenaltyBox = pygame.Rect((centerOfGoalLine[0] - convertYards2Pixels(18)), (centerOfGoalLine[1] - convertYards2Pixels(22)), convertYards2Pixels(18), convertYards2Pixels(44))
