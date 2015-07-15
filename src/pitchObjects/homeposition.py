@@ -45,8 +45,10 @@ class HomePosition(PitchObject):
                 return self.defaultPosX
             else:
                 return self.defaultPosX - FIELD_LENGTH
-        else:
+        elif not self.ball.isOutOfPlay:
             if self.team.isDefendingLeft:
                 return self.defaultPosX/4
             else:
                 return (self.defaultPosX - FIELD_LENGTH)/4
+        else:
+            return 0

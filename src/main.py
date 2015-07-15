@@ -3,7 +3,7 @@ import pygame
 from display.displaymapper import WINDOW_WIDTH, WINDOW_HEIGHT
 from gamevariables import GAME_FPS
 from match import Match
-from resources.FpsClock import FpsClock
+from libs.FpsClock import FpsClock
 
 
 __author__ = 'Thomas'

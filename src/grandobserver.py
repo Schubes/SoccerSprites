@@ -27,14 +27,21 @@ class GrandObserver:
         self.setCoveredAndBlockedPlayers(attackingTeam, defendingTeam)
         self.setOffsides(attackingTeam)
         self.setOpenPlayers(attackingTeam)
-        self.setMarkings(attackingTeam, defendingTeam)
+        self.setMarkingsAndClosestAttacker(attackingTeam, defendingTeam)
 
-    def setMarkings(self, attackingTeam, defendingTeam):
+    def setMarkingsAndClosestAttacker(self, attackingTeam, defendingTeam):
+        closestAttacker = attackingTeam.players[0]
         for attackingPlayer in attackingTeam.players:
             for defendingPlayer in sorted(defendingTeam.players, key=lambda x: abs(x.posX - attackingPlayer.posX) + abs(x.posY - attackingPlayer.posY)):
                 if not defendingPlayer.marking and pygame.sprite.collide_rect(attackingPlayer, defendingPlayer.homePosition):
                     defendingPlayer.marking = attackingPlayer
                     break
+
+            attackingPlayer.chargeToBall = False
+            if attackingPlayer.squaredDistanceTo(self.ball) < closestAttacker.squaredDistanceTo(self.ball):
+                closestAttacker = attackingPlayer
+
+        closestAttacker.chargeToBall = True
 
     def findClosestandLastDefenders(self, defendingTeam):
         closestDefender = defendingTeam.players[0]

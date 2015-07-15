@@ -1,4 +1,5 @@
 import pygame
+from controllers.possessioncontroller import PossessionController
 from display.displaymapper import convertFieldPosition, convertYards2Pixels, FIELD_LENGTH, FIELD_WIDTH, WINDOW_HEADER_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, \
     WINDOW_BORDER
 from gamevariables import COLOR_TEAM_BLUE, COLOR_TEAM_RED, COLOR_GRASS, COLOR_PAINT, PAINT_WIDTH
@@ -20,7 +21,9 @@ class Match:
         self.team1 = Team(True, COLOR_TEAM_BLUE, "Blue Team")
         self.team2 = Team(False, COLOR_TEAM_RED, "Red Team")
 
-        self.ball = Ball()
+        self.possessionController = PossessionController(self.team1, self.team2)
+
+        self.ball = Ball(self.possessionController)
         self.ballGroup = pygame.sprite.LayeredDirty(self.ball)
 
         self.allPlayers = pygame.sprite.LayeredDirty()

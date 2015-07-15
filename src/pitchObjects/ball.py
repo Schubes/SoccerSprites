@@ -1,21 +1,22 @@
 import pygame
 import math
 from display.displaymapper import FIELD_LENGTH, FIELD_WIDTH
-from gamevariables import COLOR_BALL, GAME_FPS, MECH_TURNS_UNTOUCHABLE, GRAPH_BALL_SIZE, MECH_BALL_SPEED, MECH_BALL_SIZE
+from gamevariables import COLOR_BALL, GAME_FPS, GRAPH_BALL_SIZE, MECH_BALL_SPEED, MECH_BALL_SIZE, MECH_TURNS_RECOVERING
 from pitchObjects.pitchobject import PitchObject
 
 __author__ = 'Thomas'
 
 class Ball(PitchObject):
-    def __init__(self):
+    def __init__(self, possessionController):
         PitchObject.__init__(self, COLOR_BALL, self.getStartingPosX(), self.getStartingPosY(), GRAPH_BALL_SIZE)
         self.image.set_alpha(255)
 
+        self.possessionController = possessionController
         self.possessor = None
-        self.attackingTeam = None
+        self.prevPossessor = None
         self.isLoose = True
         self.target = True
-        self.turnsUntouchable = 0
+        self.isOutOfPlay = True
 
     def getStartingPosX(self):
         return FIELD_LENGTH/2
@@ -25,12 +26,8 @@ class Ball(PitchObject):
 
     def simShot(self, rightGoal):
         print "Shot Fired!"
-
-        self.possessor.team.hasPossession = False
-        self.possessor.hasBall = False
-        self.possessor = None
-        self.isLoose = True
-        self.turnsUntouchable = 0
+        self.kicked()
+        self.possessionController.noPossession()
 
         goalY = FIELD_WIDTH/2
         if rightGoal:
@@ -42,19 +39,25 @@ class Ball(PitchObject):
         self.velY = (goalY - self.posY)/(abs(goalY - self.posY) + abs(goalX - self.posX)) * MECH_BALL_SPEED
 
     def passTo(self, player):
+        print "Passed"
+        self.kicked()
+        self.target = player
+
+        self.velX = (player.posX - self.posX)/(abs(player.posY - self.posY) + abs(player.posX - self.posX)) * MECH_BALL_SPEED
+        self.velY = (player.posY - self.posY)/(abs(player.posY - self.posY) + abs(player.posX - self.posX)) * MECH_BALL_SPEED
+
+    def kicked(self):
+        """sets properties when ball is willingly given up"""
         assert self.possessor is not None
         assert self.possessor.hasBall
         assert self.possessor.team.hasPossession
 
         self.possessor.hasBall = False
+        self.possessor.recovering = MECH_TURNS_RECOVERING
+        self.prevPossessor = self.possessor
         self.possessor = None
         self.isLoose = True
-        self.target = player
-
-        distanceToPlayer = math.sqrt((player.posX - self.posX)**2 + (player.posY - self.posY)**2)
-        #the idea is that you kick the ball faster if it is going further, but it's not linear
-        self.velX = (player.posX - self.posX)/(abs(player.posY - self.posY) + abs(player.posX - self.posX)) * MECH_BALL_SPEED
-        self.velY = (player.posY - self.posY)/(abs(player.posY - self.posY) + abs(player.posX - self.posX)) * MECH_BALL_SPEED
+        self.isOutOfPlay = False
 
     def update(self, players):
         self.moveBall()
@@ -73,69 +76,60 @@ class Ball(PitchObject):
             PitchObject.move(self)
 
     def evaluateControl(self, players):
-        if self.turnsUntouchable > 0:
-            self.turnsUntouchable -= 1
-        else:
-            players = pygame.sprite.spritecollide(self, players, False)
-            if players:
-                controlVal = 0
-                for player in players:
-                    if player.team.isDefendingLeft:
-                        controlVal += 1
-                    else:
-                        controlVal -= 1
-                if len(players) > 1:
-                    for player in players:
-                        if player != self.possessor:
-                            if self.possessor:
-                                if controlVal == 0:
-                                    winningPlayer = player
-                                    break
-                                elif controlVal > 0 and self.possessor.team.isDefendingLeft:
-                                    winningPlayer = self.possessor
-                                    break
-                                elif controlVal > 0:
-                                    if player.team.isDefendingLeft:
-                                        winningPlayer = player
-                                        break
-                                elif controlVal < 0 and not self.possessor.team.isDefendingLeft:
-                                    winningPlayer = self.possessor
-                                    break
-                                else:
-                                    if not player.team.isDefendingLeft:
-                                        winningPlayer = player
-                                        break
-                            else:
-                                if controlVal == 0:
-                                    winningPlayer = player
-                                elif controlVal > 0:
-                                    if player.team.isDefendingLeft:
-                                        winningPlayer = player
-                                        break
-                                else:
-                                    if not player.team.isDefendingLeft:
-                                        winningPlayer = player
-                                        break
-
-
+        players = pygame.sprite.spritecollide(self, players, False)
+        winningPlayer = None
+        if players:
+            controlVal = 0
+            for player in players:
+                if player.team.isDefendingLeft:
+                    controlVal += 1
                 else:
-                    winningPlayer = players[0]
+                    controlVal -= 1
 
-                #remove possesion from previous team
-                if self.attackingTeam:
-                    self.attackingTeam.hasPossession = False
+            for player in players:
+                if not player.recovering:
                     if self.possessor:
-                        self.possessor.hasBall = False
-                self.target = None
+                        if controlVal == 0:
+                            winningPlayer = player
+                            break
+                        elif controlVal > 0 and self.possessor.team.isDefendingLeft:
+                            winningPlayer = self.possessor
+                            break
+                        elif controlVal > 0:
+                            if player.team.isDefendingLeft:
+                                winningPlayer = player
+                                break
+                        elif controlVal < 0 and not self.possessor.team.isDefendingLeft:
+                            winningPlayer = self.possessor
+                            break
+                        else:
+                            if not player.team.isDefendingLeft:
+                                winningPlayer = player
+                                break
+                    else:
+                        if controlVal == 0:
+                            winningPlayer = player
+                        elif controlVal > 0:
+                            if player.team.isDefendingLeft:
+                                winningPlayer = player
+                                break
+                        else:
+                            if not player.team.isDefendingLeft:
+                                winningPlayer = player
+                                break
 
-                #select the first player who touched the ball
+        if winningPlayer:
+            if self.possessor != winningPlayer:
+                if self.possessor:
+                    self.possessor.recovering = MECH_TURNS_RECOVERING
+                    self.possessor.hasBall = False
                 self.possessor = winningPlayer
-                #set new possesion
-                self.isLoose = False
-                self.attackingTeam = players[0].team
-                self.possessor.hasBall = True
-                self.attackingTeam.hasPossession = True
-                self.turnsUntouchable = MECH_TURNS_UNTOUCHABLE
+
+            self.target = None
+            self.isLoose = False
+            self.possessor.hasBall = True
+            self.possessionController.setPossession(self.possessor.team)
+
 
     def checkOutOfBounds(self):
         """keep players from running out of bounds"""
@@ -155,3 +149,5 @@ class Ball(PitchObject):
     def outOfBounds(self):
         self.velX = 0
         self.velY = 0
+        self.isOutOfPlay = True
+        self.possessionController.switchPossession(self)
