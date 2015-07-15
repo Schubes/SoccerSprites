@@ -1,7 +1,9 @@
+import random
 import pygame
 import math
 from display.displaymapper import FIELD_LENGTH, FIELD_WIDTH
-from gamevariables import COLOR_BALL, GAME_FPS, GRAPH_BALL_SIZE, MECH_BALL_SPEED, MECH_BALL_SIZE, MECH_TURNS_RECOVERING
+from gamevariables import COLOR_BALL, GAME_FPS, GRAPH_BALL_SIZE, MECH_BALL_SPEED, MECH_BALL_SIZE, MECH_TURNS_RECOVERING, \
+    MECH_PASS_VEL_MODIFIER
 from pitchObjects.pitchobject import PitchObject
 
 __author__ = 'Thomas'
@@ -43,8 +45,12 @@ class Ball(PitchObject):
         self.kicked()
         self.target = player
 
-        self.velX = (player.posX - self.posX)/(abs(player.posY - self.posY) + abs(player.posX - self.posX)) * MECH_BALL_SPEED
-        self.velY = (player.posY - self.posY)/(abs(player.posY - self.posY) + abs(player.posX - self.posX)) * MECH_BALL_SPEED
+        difX = player.posX - self.posX + player.velX / MECH_PASS_VEL_MODIFIER #Just a magic number that works well
+        difY = player.posY - self.posY + player.velY / MECH_PASS_VEL_MODIFIER
+        difMag = math.sqrt(difX**2 + difY**2)
+
+        self.velX = difX/difMag * MECH_BALL_SPEED
+        self.velY = difY/difMag * MECH_BALL_SPEED
 
     def kicked(self):
         """sets properties when ball is willingly given up"""
@@ -80,43 +86,24 @@ class Ball(PitchObject):
         winningPlayer = None
         if players:
             controlVal = 0
-            for player in players:
-                if player.team.isDefendingLeft:
-                    controlVal += 1
-                else:
-                    controlVal -= 1
-
-            for player in players:
-                if not player.recovering:
-                    if self.possessor:
-                        if controlVal == 0:
-                            winningPlayer = player
-                            break
-                        elif controlVal > 0 and self.possessor.team.isDefendingLeft:
-                            winningPlayer = self.possessor
-                            break
-                        elif controlVal > 0:
-                            if player.team.isDefendingLeft:
-                                winningPlayer = player
-                                break
-                        elif controlVal < 0 and not self.possessor.team.isDefendingLeft:
-                            winningPlayer = self.possessor
-                            break
-                        else:
-                            if not player.team.isDefendingLeft:
-                                winningPlayer = player
-                                break
+            if self.possessor:
+                for player in players:
+                    if player.team is self.possessor.team:
+                        controlVal += 1
                     else:
-                        if controlVal == 0:
-                            winningPlayer = player
-                        elif controlVal > 0:
+                        controlVal -= 1
+
+                for player in players:
+                    if not player.recovering:
+                        if controlVal > 0:
+                            winningPlayer = self.possessor
+                            break
+                        elif controlVal <= 0:
                             if player.team.isDefendingLeft:
                                 winningPlayer = player
                                 break
-                        else:
-                            if not player.team.isDefendingLeft:
-                                winningPlayer = player
-                                break
+            else:
+                winningPlayer = random.choice(players)
 
         if winningPlayer:
             if self.possessor != winningPlayer:

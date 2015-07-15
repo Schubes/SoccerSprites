@@ -29,7 +29,7 @@ class Match:
         self.allPlayers = pygame.sprite.LayeredDirty()
         self.team1.setStartingLineUp((2, 3, 3, 2), self.ball, window)
         self.allPlayers.add(self.team1.players)
-        self.team2.setStartingLineUp((1,1,1), self.ball, window)
+        self.team2.setStartingLineUp((4,4,2), self.ball, window)
         self.allPlayers.add(self.team2.players)
 
         self.allObjects = pygame.sprite.LayeredDirty(self.allPlayers, self.ballGroup, self.team1.goal, self.team2.goal)

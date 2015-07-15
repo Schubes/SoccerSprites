@@ -120,8 +120,8 @@ class FieldPlayer(PitchObject):
                 self.chase(self.ball)
             elif self.hasBall:
                 self.accelerate( self.dirX(1), 0)
-            elif self.ball.isLoose and pygame.sprite.collide_rect(self, self.homePosition):
-                self.chase(self.ball)
+            # elif self.ball.isLoose and pygame.sprite.collide_rect(self, self.homePosition):
+            #     self.chase(self.ball)
             else:
                 self.chase(self.homePosition)
 

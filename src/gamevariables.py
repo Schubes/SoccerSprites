@@ -31,6 +31,7 @@ ATTR_SHOOTING_RANGE = 30 #Abstract Units check its usage
 MECH_TURNS_RECOVERING = max(float(GAME_FPS)/3,4)
 MECH_BALL_SPEED = 1200/GAME_FPS
 MECH_BALL_SIZE = 2 #size in yards
+MECH_PASS_VEL_MODIFIER = 3 #just a magic number that works well
 
 GRAPH_PLAYER_SIZE = [convertYards2Pixels(float(4)/3), convertYards2Pixels(float(4)/3)]
 GRAPH_BALL_SIZE = [convertYards2Pixels(MECH_BALL_SIZE), convertYards2Pixels(MECH_BALL_SIZE)]
