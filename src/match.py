@@ -1,11 +1,9 @@
 import pygame
 from controllers.possessioncontroller import PossessionController
-from display.displaymapper import convertFieldPosition, convertYards2Pixels, FIELD_LENGTH, FIELD_WIDTH, WINDOW_HEADER_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, \
-    WINDOW_BORDER
-from gamevariables import COLOR_TEAM_BLUE, COLOR_TEAM_RED, COLOR_GRASS, COLOR_PAINT, PAINT_WIDTH
+from display.displaymapper import convertFieldPosition, convertYards2Pixels, FIELD_LENGTH, FIELD_WIDTH, WINDOW_HEADER_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT
+from gamevariables import COLOR_TEAM_BLUE, COLOR_TEAM_RED, COLOR_GRASS, COLOR_PAINT, PAINT_WIDTH, COLOR_HEADER
 from grandobserver import GrandObserver
 from pitchObjects.ball import Ball
-from pitchObjects.fieldplayer import FieldPlayer
 from team import Team
 
 __author__ = 'Thomas'
@@ -14,6 +12,9 @@ class Match:
     """Handles match gameplay"""
     def __init__(self, window):
         self.window = window
+
+        self.header = self.createHeader()
+        self.headerBG = self.createHeader()
 
         self.pitchSurface = self.createPitchSurface()
         self.fieldBackground = self.createPitchSurface()
@@ -26,28 +27,33 @@ class Match:
         self.ball = Ball(self.possessionController)
         self.ballGroup = pygame.sprite.LayeredDirty(self.ball)
 
+        #PLAYERS
         self.allPlayers = pygame.sprite.LayeredDirty()
         self.team1.setStartingLineUp((2, 3, 3, 2), self.ball, window)
         self.allPlayers.add(self.team1.players)
-        self.team2.setStartingLineUp((4,4,2), self.ball, window)
+        self.team2.setStartingLineUp((1,2,3,4), self.ball, window)
         self.allPlayers.add(self.team2.players)
 
-        self.allObjects = pygame.sprite.LayeredDirty(self.allPlayers, self.ballGroup, self.team1.goal, self.team2.goal)
-        self.allObjects.move_to_back(self.ball)
+        #OBJECTS TO BE DRAWN
+        self.allPitchObjects = pygame.sprite.LayeredDirty(self.allPlayers, self.ballGroup, self.team1.goal, self.team2.goal)
+        self.allPitchObjects.move_to_back(self.ball)
 
-        self.ball.posX = 30
-        self.ball.posY = 10
+        self.ball.posX = 60
+        self.ball.posY = 40
 
         self.grandObserver = GrandObserver(self.team1, self.team2, self.ball)
+
+        self.startTime = pygame.time.get_ticks()
 
 
     def playMatchTurn(self):
         self.grandObserver.analyze()
         self.allPlayers.update(self.grandObserver)
         self.ballGroup.update(self.allPlayers)
-        self.allObjects.draw(self.pitchSurface)
-        self.allObjects.clear(self.pitchSurface, self.fieldBackground)
+        self.allPitchObjects.draw(self.pitchSurface)
+        self.allPitchObjects.clear(self.pitchSurface, self.fieldBackground)
         self.window.blit(self.pitchSurface, (0, WINDOW_HEADER_HEIGHT))
+        self.window.blit(self.header, (0, 0))
 
 
     def createPitchSurface(self):
@@ -88,3 +94,9 @@ class Match:
 
 
         return pitchSurface
+
+    def createHeader(self):
+        header = pygame.Surface((WINDOW_WIDTH, WINDOW_HEADER_HEIGHT))
+        header.fill(COLOR_HEADER)
+
+        return header

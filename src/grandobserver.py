@@ -13,6 +13,7 @@ class GrandObserver:
         self.ball = ball
 
     def analyze(self):
+        #TODO: optimize these functions to reduce repeated looping
         if self.team1.hasPossession:
             attackingTeam = self.team1
             defendingTeam = self.team2
@@ -47,15 +48,13 @@ class GrandObserver:
         closestDefender = defendingTeam.players[0]
         stoppingPlayer = defendingTeam.players[0]
         self.openPlayers = []
-        self.lastDefender = defendingTeam.players[0]
+        self.lastDefender = defendingTeam.players[0] # This works because it has been sorted earlier
         for defendingPlayer in defendingTeam.players:
             defendingPlayer.blocking = []
             defendingPlayer.covering = []
             defendingPlayer.chargeToBall = False
             defendingPlayer.marking = None
 
-            if defendingPlayer.getDistanceToGoalline(False) < self.lastDefender.getDistanceToGoalline(False):
-                self.lastDefender = defendingPlayer
             if defendingPlayer.squaredDistanceTo(self.ball) < closestDefender.squaredDistanceTo(self.ball):
                 closestDefender = defendingPlayer
             if defendingPlayer.getDistanceToGoalline(False) < self.ball.getDistanceToGoalline(False, defendingPlayer.team.isDefendingLeft):

@@ -19,7 +19,7 @@ class HomePosition(PitchObject):
 
     def update(self):
         self.posX = self.defaultPosX + self.ballModifierX() + self.attackingModifierX()
-        self.posY = self.defaultPosY + self.ballModifierY()
+        self.posY = self.defaultPosY + self.ballModifierY() + self.defendingModifierY()
         PitchObject.update(self)
 
     def ballModifierX(self):
@@ -38,14 +38,22 @@ class HomePosition(PitchObject):
                 overloadingBox = (FIELD_WIDTH/2 - self.defaultPosY)/(100/(self.posX + 1))/2
         return balltracking + overloadingBox
 
+    def defendingModifierY(self):
+        if not self.team.hasPossession:
+            return (self.ball.posY - self.defaultPosY)/FIELD_WIDTH
+        else:
+            return 0
 
     def attackingModifierX(self):
         if self.team.hasPossession:
+            setPieceMultiplier = 1
+            if self.ball.outOfPlay is "GoalKick" or self.ball.outOfPlay is "CornerKick":
+                setPieceMultiplier = 2
             if self.team.isDefendingLeft:
-                return self.defaultPosX
+                return self.defaultPosX * setPieceMultiplier
             else:
-                return self.defaultPosX - FIELD_LENGTH
-        elif not self.ball.isOutOfPlay:
+                return (self.defaultPosX - FIELD_LENGTH) * setPieceMultiplier
+        elif not self.ball.outOfPlay:
             if self.team.isDefendingLeft:
                 return self.defaultPosX/4
             else:

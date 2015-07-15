@@ -4,6 +4,7 @@ from display.displaymapper import convertYards2Pixels
 __author__ = 'Thomas'
 
 COLOR_GRASS = (40, 210, 40)
+COLOR_HEADER = (100, 60, 100)
 COLOR_TEAM_RED = (240, 30, 30)
 COLOR_TEAM_BLUE = (30, 30, 240)
 COLOR_BALL = (128, 128, 128)
@@ -23,13 +24,14 @@ STRAT_COVERAGE = 3**2 #Yards Squared
 STRAT_BLOCKAGE = math.radians(20) #Theta difference in radians
 STRAT_NEAR_BALL = 5**2 #Yards Squared
 STRAT_MIN_PASS = 12
+STRAT_TRY_CROSSING = 15 #Yards from goalline before attempting a cross
 
-ATTR_PLAYER_SPEED = float(500)/GAME_FPS
+ATTR_PLAYER_SPEED = float(400)/GAME_FPS
 ATTR_PLAYER_ACCEL = float(100)/GAME_FPS
 ATTR_SHOOTING_RANGE = 30 #Abstract Units check its usage
 
-MECH_TURNS_RECOVERING = max(float(GAME_FPS)/5,3)
-MECH_BALL_SPEED = 1200/GAME_FPS
+MECH_TURNS_RECOVERING = max(float(GAME_FPS)/2,3)
+MECH_BALL_SPEED = 1000/GAME_FPS
 MECH_BALL_SIZE = 2 #size in yards
 MECH_PASS_VEL_MODIFIER = 3 #just a magic number that works well
 

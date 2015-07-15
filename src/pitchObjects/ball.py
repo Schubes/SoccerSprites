@@ -2,7 +2,7 @@ import random
 import pygame
 import math
 from display.displaymapper import FIELD_LENGTH, FIELD_WIDTH
-from gamevariables import COLOR_BALL, GAME_FPS, GRAPH_BALL_SIZE, MECH_BALL_SPEED, MECH_BALL_SIZE, MECH_TURNS_RECOVERING, \
+from gamevariables import COLOR_BALL, GRAPH_BALL_SIZE, MECH_BALL_SPEED, MECH_BALL_SIZE, MECH_TURNS_RECOVERING, \
     MECH_PASS_VEL_MODIFIER
 from pitchObjects.pitchobject import PitchObject
 
@@ -18,7 +18,7 @@ class Ball(PitchObject):
         self.prevPossessor = None
         self.isLoose = True
         self.target = True
-        self.isOutOfPlay = True
+        self.outOfPlay = "Kickoff"
 
     def getStartingPosX(self):
         return FIELD_LENGTH/2
@@ -63,7 +63,7 @@ class Ball(PitchObject):
         self.prevPossessor = self.possessor
         self.possessor = None
         self.isLoose = True
-        self.isOutOfPlay = False
+        self.outOfPlay = None
 
     def update(self, players):
         self.moveBall()
@@ -112,6 +112,7 @@ class Ball(PitchObject):
                 if self.possessor:
                     self.possessor.recovering = MECH_TURNS_RECOVERING
                     self.possessor.hasBall = False
+                    self.prevPossessor = self.possessor
                 self.possessor = winningPlayer
 
             self.target = None
@@ -124,19 +125,54 @@ class Ball(PitchObject):
         """keep players from running out of bounds"""
         if self.posX > FIELD_LENGTH + MECH_BALL_SIZE:
             self.posX = FIELD_LENGTH + MECH_BALL_SIZE
-            self.outOfBounds()
+            if self.blameTeam():
+                self.posX = FIELD_LENGTH - 6
+                self.outOfBounds("GoalKick")
+            else:
+                self.posX = FIELD_LENGTH
+                self.outOfBounds("CornerKick")
+
         if self.posX < 0 - MECH_BALL_SIZE:
-            self.posX = 0 - MECH_BALL_SIZE
-            self.outOfBounds()
+            if self.blameTeam():
+                self.posX = 0
+                self.outOfBounds("CornerKick")
+            else:
+                self.posX = 6
+                self.outOfBounds("GoalKick")
+
         if self.posY > FIELD_WIDTH + MECH_BALL_SIZE:
             self.posY = FIELD_WIDTH + MECH_BALL_SIZE
-            self.outOfBounds()
+            self.outOfBounds("ThrowIn")
+
         if self.posY < 0 - MECH_BALL_SIZE:
             self.posY = 0 - MECH_BALL_SIZE
-            self.outOfBounds()
+            self.outOfBounds("ThrowIn")
 
-    def outOfBounds(self):
+    def blameTeam(self):
+        assert self.possessor or self.prevPossessor
+        if self.possessor:
+            return self.possessor.team.isDefendingLeft
+        if self.prevPossessor:
+            return self.prevPossessor.team.isDefendingLeft
+
+    def outOfBounds(self, typeOfPlay):
+        if typeOfPlay is "CornerKick":
+            if self.posY > FIELD_WIDTH/2:
+                self.posY = FIELD_WIDTH
+            else:
+                self.posY = 0
+        elif typeOfPlay is "GoalKick":
+            if self.posY > FIELD_WIDTH/2:
+                self.posY = FIELD_WIDTH/2 + 10
+            else:
+                self.posY = FIELD_WIDTH/2 - 10
+
         self.velX = 0
         self.velY = 0
-        self.isOutOfPlay = True
+
+        self.outOfPlay = typeOfPlay
+        if self.possessor:
+            self.possessor.hasBall = False
         self.possessionController.switchPossession(self)
+        self.prevPossessor = self.possessor
+        self.possessor = None

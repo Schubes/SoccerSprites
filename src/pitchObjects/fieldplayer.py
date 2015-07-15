@@ -1,7 +1,7 @@
 import pygame
 from display.displaymapper import FIELD_LENGTH, FIELD_WIDTH
 from gamevariables import STRAT_NEAR_BALL, ATTR_PLAYER_SPEED, ATTR_SHOOTING_RANGE, GRAPH_PLAYER_SIZE, ATTR_PLAYER_ACCEL, \
-    STRAT_MIN_PASS
+    STRAT_MIN_PASS, STRAT_TRY_CROSSING
 from pitchObjects.homeposition import HomePosition
 from pitchObjects.pitchobject import PitchObject
 import math
@@ -31,7 +31,7 @@ class FieldPlayer(PitchObject):
         self.marking = None
         self.isBlockedBy = []
         self.isCoveredBy = []
-        self.recovering = 0 #If the player has recently lost the ball, they are recovering
+        self.recovering = 0 #If the player has recently lost the ball, they are recovering and cannot touch the ball
         self.chargeToBall = False
         self.speed = float(ATTR_PLAYER_SPEED)
         self.acceleration = float(ATTR_PLAYER_ACCEL)
@@ -83,19 +83,29 @@ class FieldPlayer(PitchObject):
             self.defend()
 
     def makePlay(self, grandObserver):
-        if self.ball.isOutOfPlay:
-            if not self.lookToPass(grandObserver):
-                self.ball.simShot(self.team.isDefendingLeft)
+        if self.ball.outOfPlay:
+            self.cross()
         elif self.isInShootingRange():
             self.ball.simShot(self.team.isDefendingLeft)
         else:
             if not self.lookToPass(grandObserver):
+                if self.getDistanceToGoalline(True) < STRAT_TRY_CROSSING:
+                    self.cross()
                 self.makeRun(grandObserver)
+
+    def cross(self):
+        teammates = sorted(self.team.players, key=lambda x: x.getWeightedDistanceToGoal(True))
+        for player in teammates:
+            if not player.blockedBy and not player.coveredBy and not player is self:
+                self.ball.passTo(player)
+                return
+        self.ball.passTo(teammates[0])
+
+
+
 
     def lookToPass(self, grandObserver):
         if grandObserver.openPlayers:
-            print len(grandObserver.openPlayers)
-            #this works because openPlayers is sorted by closeness to opponent's goalline
             # TODO: introduce some intelligent randomness
             bestPassOption = self
             for openPlayer in grandObserver.openPlayers:
@@ -111,7 +121,10 @@ class FieldPlayer(PitchObject):
 
 
     def makeRun(self, grandObserver):
-        if grandObserver.lastDefender.getDistanceToGoalline(False) > self.getDistanceToGoalline(True) \
+        # TODO: make smarter runs and be more aggressive in front of goal
+        if self.ball.outOfPlay is "Kickoff":
+            pass
+        elif grandObserver.lastDefender.getDistanceToGoalline(False) > self.getDistanceToGoalline(True) \
                 < self.ball.getDistanceToGoalline(True, self.team.isDefendingLeft) and \
                         self.getDistanceToGoalline(True) < FIELD_LENGTH/2:
             self.accelerate( -self.dirX(1), 0)
@@ -120,14 +133,12 @@ class FieldPlayer(PitchObject):
                 self.chase(self.ball)
             elif self.hasBall:
                 self.accelerate( self.dirX(1), 0)
-            # elif self.ball.isLoose and pygame.sprite.collide_rect(self, self.homePosition):
-            #     self.chase(self.ball)
             else:
                 self.chase(self.homePosition)
 
 
     def defend(self):
-        if self.ball.isOutOfPlay:
+        if self.ball.outOfPlay:
             self.chase(self.homePosition)
         elif self.chargeToBall or self.nearBall():
             self.chase(self.ball)
@@ -169,19 +180,8 @@ class FieldPlayer(PitchObject):
         if difMag > 0:
             self.accelerate(float(difX) / difMag, float(difY) / difMag)
 
-    def confirmInBounds(self):
-        """keep players from running out of bounds"""
-        if self.posX > FIELD_LENGTH:
-            self.posX = FIELD_LENGTH
-        if self.posX < 0:
-            self.posX = 0
-        if self.posY > FIELD_WIDTH:
-            self.posY = FIELD_WIDTH
-        if self.posY < 0:
-            self.posY = 0
-
     def getWeightedDistanceToGoal(self, attacking):
-        return self.getDistanceToGoalline(attacking) + abs(self.posY - FIELD_WIDTH / 2) * 3/2
+        return self.getDistanceToGoalline(attacking) + abs(self.posY - FIELD_WIDTH / 2) * 5/4
 
     def getDistanceToGoalline(self, attacking):
         return PitchObject.getDistanceToGoalline(self, attacking, self.team.isDefendingLeft)
