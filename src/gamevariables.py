@@ -28,7 +28,7 @@ ATTR_PLAYER_SPEED = float(500)/GAME_FPS
 ATTR_PLAYER_ACCEL = float(100)/GAME_FPS
 ATTR_SHOOTING_RANGE = 30 #Abstract Units check its usage
 
-MECH_TURNS_RECOVERING = max(float(GAME_FPS)/3,4)
+MECH_TURNS_RECOVERING = max(float(GAME_FPS)/5,3)
 MECH_BALL_SPEED = 1200/GAME_FPS
 MECH_BALL_SIZE = 2 #size in yards
 MECH_PASS_VEL_MODIFIER = 3 #just a magic number that works well
