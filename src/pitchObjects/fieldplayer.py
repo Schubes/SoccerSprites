@@ -138,11 +138,12 @@ class FieldPlayer(PitchObject):
     def defend(self):
         if self.ball.outOfPlay:
             self.chase(self.homePosition)
-        elif self.chargeToBall or self.nearBall():
+        elif self.chargeToBall or self.nearBall() and ((self.ball.posX - self.posX) < 0 == self.ball.velX < 0) and \
+                ((self.ball.posY - self.posY) < 0 == self.ball.velY < 0):
             self.chase(self.ball)
-        elif self.marking and self.getDistanceToGoalline(False) < 30 and \
-                self.getDistanceToGoalline(False) < self.ball.getDistanceToGoalline(False, self.team.isDefendingLeft):
-            self.accelerate(0, self.marking.posY - self.posY)
+        # elif self.marking and self.getDistanceToGoalline(False) < 30 and \
+        #         self.getDistanceToGoalline(False) < self.ball.getDistanceToGoalline(False, self.team.isDefendingLeft):
+        #     self.accelerate(0, self.marking.posY - self.posY)
         elif self.marking:
             self.cover(self.marking)
         elif not pygame.sprite.collide_rect(self, self.homePosition):
@@ -160,8 +161,6 @@ class FieldPlayer(PitchObject):
         if self.team.isDefendingLeft:
             object2goalvectX = 0 - pitchObject.posX
             self2goalvectX = 0 - self.posX
-
-            #difX = pitchObject.posX - self.posX - 5
         else:
             object2goalvectX = FIELD_LENGTH - pitchObject.posX
             self2goalvectX = FIELD_LENGTH - self.posX
@@ -176,18 +175,35 @@ class FieldPlayer(PitchObject):
         selfYnorm = self2goalvectY/self2goalMag
         selfXnorm = self2goalvectX/self2goalMag
 
+        # if the object is closer to the goal, we need to make our player run back to the goal.
         if object2goalMag < self2goalMag:
             selfXnorm = selfXnorm * 2
             selfYnorm = selfYnorm * 2
         self.accelerate(selfXnorm - objXnorm, selfYnorm - objYnorm)
 
     def chase(self, pitchObject):
-        # TODO: eventually want to factor in dervatives of position
-        difX = pitchObject.posX - self.posX
-        difY = pitchObject.posY - self.posY
-        difMag = abs(difX) + abs(difY)
-        if difMag > 0:
-            self.accelerate(float(difX) / difMag, float(difY) / difMag)
+        objectSpeed = math.sqrt(pitchObject.velX**2 + pitchObject.velY**2)
+        if objectSpeed > 0:
+            objXnorm = pitchObject.velX/objectSpeed
+            objYnorm = pitchObject.velY/objectSpeed
+
+            selfvectX = pitchObject.velX*100000000 + pitchObject.posX - self.posX
+            selfvectY = pitchObject.velY*100000000 + pitchObject.posY - self.posY
+
+            selfMag = math.sqrt(selfvectX**2 + selfvectY**2)
+
+            if selfMag > 0:
+                difX = selfvectX/selfMag - objXnorm
+                difY = selfvectY/selfMag - objYnorm
+                difMag = math.sqrt(difX**2 + difY**2)
+                if difMag > 0:
+                    self.accelerate(float(difX) / difMag, float(difY) / difMag)# TODO: eventually want to factor in dervatives of position
+        else:
+            difX = pitchObject.posX - self.posX
+            difY = pitchObject.posY - self.posY
+            difMag = abs(difX) + abs(difY)
+            if difMag > 0:
+                self.accelerate(float(difX) / difMag, float(difY) / difMag)
 
     def getWeightedDistanceToGoal(self, attacking):
         return self.getDistanceToGoalline(attacking) + abs(self.posY - FIELD_WIDTH / 2) * 5/4
