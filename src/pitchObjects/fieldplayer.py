@@ -53,15 +53,16 @@ class FieldPlayer(PitchObject):
 
     def accelerate(self, vectX, vectY):
         vectMag = math.sqrt(vectX**2 + vectY**2)
-        vectX = self.speed * vectX / vectMag
-        vectY = self.speed * vectY / vectMag
+        if vectMag > 0:
+            vectX = self.speed * vectX / vectMag
+            vectY = self.speed * vectY / vectMag
 
-        difX = (vectX - self.velX)
-        difY = (vectY - self.velY)
-        difMag = math.sqrt((vectX - self.velX)**2 + (vectY - self.velY)**2)
-        if difMag > 0:
-            self.velX += difX/difMag * self.acceleration
-            self.velY += difY/difMag * self.acceleration
+            difX = (vectX - self.velX)
+            difY = (vectY - self.velY)
+            difMag = math.sqrt((vectX - self.velX)**2 + (vectY - self.velY)**2)
+            if difMag > 0:
+                self.velX += difX/difMag * self.acceleration
+                self.velY += difY/difMag * self.acceleration
 
 
     def move(self):
@@ -100,9 +101,6 @@ class FieldPlayer(PitchObject):
                 self.ball.passTo(player)
                 return
         self.ball.passTo(teammates[0])
-
-
-
 
     def lookToPass(self, grandObserver):
         if grandObserver.openPlayers:
@@ -145,16 +143,12 @@ class FieldPlayer(PitchObject):
         elif self.marking and self.getDistanceToGoalline(False) < 30 and \
                 self.getDistanceToGoalline(False) < self.ball.getDistanceToGoalline(False, self.team.isDefendingLeft):
             self.accelerate(0, self.marking.posY - self.posY)
-        elif self.marking and self.getDistanceToGoalline(False) < 30:
-            self.chase(self.marking)
         elif self.marking:
             self.cover(self.marking)
         elif not pygame.sprite.collide_rect(self, self.homePosition):
             self.chase(self.homePosition)
-        elif self.getDistanceToGoalline(False) > 30:
-            self.cover(self.ball)
         else:
-            self.chase(self.ball)
+            self.cover(self.ball)
 
     def nearBall(self):
         if self.squaredDistanceTo(self.ball) < STRAT_NEAR_BALL:
@@ -164,13 +158,28 @@ class FieldPlayer(PitchObject):
 
     def cover(self, pitchObject):
         if self.team.isDefendingLeft:
-            difX = pitchObject.posX - self.posX - 5
+            object2goalvectX = 0 - pitchObject.posX
+            self2goalvectX = 0 - self.posX
+
+            #difX = pitchObject.posX - self.posX - 5
         else:
-            difX = pitchObject.posX - self.posX + 5
-        difY = pitchObject.posY - self.posY
-        difMag = abs(difX) + abs(difY)
-        if difMag > 0:
-            self.accelerate(float(difX) / difMag, float(difY) / difMag)
+            object2goalvectX = FIELD_LENGTH - pitchObject.posX
+            self2goalvectX = FIELD_LENGTH - self.posX
+        object2goalvectY = FIELD_WIDTH/2 - pitchObject.posY
+        self2goalvectY = FIELD_WIDTH/2 - self.posY
+
+        object2goalMag = math.sqrt(object2goalvectX**2 + object2goalvectY**2)
+        self2goalMag = math.sqrt(self2goalvectX**2 + self2goalvectY**2)
+
+        objYnorm = object2goalvectY/object2goalMag
+        objXnorm = object2goalvectX/object2goalMag
+        selfYnorm = self2goalvectY/self2goalMag
+        selfXnorm = self2goalvectX/self2goalMag
+
+        if object2goalMag < self2goalMag:
+            selfXnorm = selfXnorm * 2
+            selfYnorm = selfYnorm * 2
+        self.accelerate(selfXnorm - objXnorm, selfYnorm - objYnorm)
 
     def chase(self, pitchObject):
         # TODO: eventually want to factor in dervatives of position
