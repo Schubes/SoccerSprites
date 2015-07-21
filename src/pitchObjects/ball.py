@@ -37,8 +37,8 @@ class Ball(PitchObject):
         else:
             goalX = 0
 
-        self.velX = (goalX - self.posX)/(abs(goalY - self.posY) + abs(goalX - self.posX)) * MECH_BALL_SPEED
-        self.velY = (goalY - self.posY)/(abs(goalY - self.posY) + abs(goalX - self.posX)) * MECH_BALL_SPEED
+        self.velX = (goalX - self.posX)/(math.sqrt((goalY - self.posY)**2 + (goalX - self.posX)**2)) * MECH_BALL_SPEED
+        self.velY = (goalY - self.posY)/(math.sqrt((goalY - self.posY)**2 + (goalX - self.posX)**2)) * MECH_BALL_SPEED
 
     def passTo(self, player):
         print "Passed"
@@ -120,6 +120,10 @@ class Ball(PitchObject):
             self.possessor.hasBall = True
             self.possessionController.setPossession(self.possessor.team)
 
+            if winningPlayer.isOffsides and self.isLoose and not self.outOfPlay:
+                print "OFFSIDES!!!!"
+                self.linesPersonRuling("SetPiece")
+
 
     def checkOutOfBounds(self):
         """keep players from running out of bounds"""
@@ -127,26 +131,26 @@ class Ball(PitchObject):
             self.posX = FIELD_LENGTH + MECH_BALL_SIZE
             if self.blameTeam():
                 self.posX = FIELD_LENGTH - 6
-                self.outOfBounds("GoalKick")
+                self.linesPersonRuling("GoalKick")
             else:
                 self.posX = FIELD_LENGTH
-                self.outOfBounds("CornerKick")
+                self.linesPersonRuling("CornerKick")
 
         if self.posX < 0 - MECH_BALL_SIZE:
             if self.blameTeam():
                 self.posX = 0
-                self.outOfBounds("CornerKick")
+                self.linesPersonRuling("CornerKick")
             else:
                 self.posX = 6
-                self.outOfBounds("GoalKick")
+                self.linesPersonRuling("GoalKick")
 
         if self.posY > FIELD_WIDTH + MECH_BALL_SIZE:
             self.posY = FIELD_WIDTH + MECH_BALL_SIZE
-            self.outOfBounds("ThrowIn")
+            self.linesPersonRuling("ThrowIn")
 
         if self.posY < 0 - MECH_BALL_SIZE:
             self.posY = 0 - MECH_BALL_SIZE
-            self.outOfBounds("ThrowIn")
+            self.linesPersonRuling("ThrowIn")
 
     def blameTeam(self):
         assert self.possessor or self.prevPossessor
@@ -155,7 +159,7 @@ class Ball(PitchObject):
         if self.prevPossessor:
             return self.prevPossessor.team.isDefendingLeft
 
-    def outOfBounds(self, typeOfPlay):
+    def linesPersonRuling(self, typeOfPlay):
         if typeOfPlay is "CornerKick":
             if self.posY > FIELD_WIDTH/2:
                 self.posY = FIELD_WIDTH

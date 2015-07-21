@@ -19,7 +19,7 @@ PAINT_WIDTH = 3
 
 GAME_FPS = 30
 
-STRAT_HOME_POS_SIZE = [convertYards2Pixels(20), convertYards2Pixels(20)]
+STRAT_HOME_POS_SIZE = [convertYards2Pixels(10), convertYards2Pixels(10)]
 STRAT_COVERAGE = 3**2 #Yards Squared
 STRAT_BLOCKAGE = math.radians(20) #Theta difference in radians
 STRAT_NEAR_BALL = 5**2 #Yards Squared
@@ -33,7 +33,7 @@ ATTR_SHOOTING_RANGE = 30 #Abstract Units check its usage
 MECH_TURNS_RECOVERING = max(float(GAME_FPS)/2,3)
 MECH_BALL_SPEED = 1000/GAME_FPS
 MECH_BALL_SIZE = 2 #size in yards
-MECH_PASS_VEL_MODIFIER = 3 #just a magic number that works well
+MECH_PASS_VEL_MODIFIER = 2 #just a magic number that works well
 
 GRAPH_PLAYER_SIZE = [convertYards2Pixels(float(4)/3), convertYards2Pixels(float(4)/3)]
 GRAPH_BALL_SIZE = [convertYards2Pixels(MECH_BALL_SIZE), convertYards2Pixels(MECH_BALL_SIZE)]

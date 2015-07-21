@@ -29,17 +29,17 @@ class Match:
 
         #PLAYERS
         self.allPlayers = pygame.sprite.LayeredDirty()
-        self.team1.setStartingLineUp((2, 3, 3, 2), self.ball, window)
+        self.team1.setStartingLineUp((4, 3, 3), self.ball, window)
         self.allPlayers.add(self.team1.players)
-        self.team2.setStartingLineUp((1,2,3,4), self.ball, window)
+        self.team2.setStartingLineUp((4,1,2,1,2), self.ball, window)
         self.allPlayers.add(self.team2.players)
 
         #OBJECTS TO BE DRAWN
         self.allPitchObjects = pygame.sprite.LayeredDirty(self.allPlayers, self.ballGroup, self.team1.goal, self.team2.goal)
         self.allPitchObjects.move_to_back(self.ball)
 
-        self.ball.posX = 60
-        self.ball.posY = 40
+        self.ball.posX = FIELD_LENGTH/2
+        self.ball.posY = FIELD_WIDTH/2
 
         self.grandObserver = GrandObserver(self.team1, self.team2, self.ball)
 

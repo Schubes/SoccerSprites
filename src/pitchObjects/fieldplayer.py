@@ -1,7 +1,7 @@
 import pygame
 from display.displaymapper import FIELD_LENGTH, FIELD_WIDTH
 from gamevariables import STRAT_NEAR_BALL, ATTR_PLAYER_SPEED, ATTR_SHOOTING_RANGE, GRAPH_PLAYER_SIZE, ATTR_PLAYER_ACCEL, \
-    STRAT_MIN_PASS, STRAT_TRY_CROSSING
+    STRAT_MIN_PASS, STRAT_TRY_CROSSING, COLOR_ORANGE, COLOR_TEAL
 from pitchObjects.homeposition import HomePosition
 from pitchObjects.pitchobject import PitchObject
 import math
@@ -61,8 +61,8 @@ class FieldPlayer(PitchObject):
             difY = (vectY - self.velY)
             difMag = math.sqrt((vectX - self.velX)**2 + (vectY - self.velY)**2)
             if difMag > 0:
-                self.velX += difX/difMag * self.acceleration
-                self.velY += difY/difMag * self.acceleration
+                self.velX += float(difX)/difMag * self.acceleration
+                self.velY += float(difY)/difMag * self.acceleration
 
 
     def move(self):
@@ -128,7 +128,7 @@ class FieldPlayer(PitchObject):
             self.accelerate( -self.dirX(1), 0)
         else:
             if self.ball.target is self:
-                self.chase(self.ball)
+                self.intercept(self.ball)
             elif self.hasBall:
                 self.accelerate( self.dirX(1), 0)
             else:
@@ -140,10 +140,7 @@ class FieldPlayer(PitchObject):
             self.chase(self.homePosition)
         elif self.chargeToBall or self.nearBall() and ((self.ball.posX - self.posX) < 0 == self.ball.velX < 0) and \
                 ((self.ball.posY - self.posY) < 0 == self.ball.velY < 0):
-            self.chase(self.ball)
-        # elif self.marking and self.getDistanceToGoalline(False) < 30 and \
-        #         self.getDistanceToGoalline(False) < self.ball.getDistanceToGoalline(False, self.team.isDefendingLeft):
-        #     self.accelerate(0, self.marking.posY - self.posY)
+            self.intercept(self.ball)
         elif self.marking:
             self.cover(self.marking)
         elif not pygame.sprite.collide_rect(self, self.homePosition):
@@ -182,6 +179,13 @@ class FieldPlayer(PitchObject):
         self.accelerate(selfXnorm - objXnorm, selfYnorm - objYnorm)
 
     def chase(self, pitchObject):
+        difX = pitchObject.posX - self.posX
+        difY = pitchObject.posY - self.posY
+        difMag = abs(difX) + abs(difY)
+        if difMag > 0:
+            self.accelerate(float(difX) / difMag, float(difY) / difMag)
+
+    def intercept(self, pitchObject):
         objectSpeed = math.sqrt(pitchObject.velX**2 + pitchObject.velY**2)
         if objectSpeed > 0:
             objXnorm = pitchObject.velX/objectSpeed
@@ -196,14 +200,12 @@ class FieldPlayer(PitchObject):
                 difX = selfvectX/selfMag - objXnorm
                 difY = selfvectY/selfMag - objYnorm
                 difMag = math.sqrt(difX**2 + difY**2)
-                if difMag > 0:
-                    self.accelerate(float(difX) / difMag, float(difY) / difMag)# TODO: eventually want to factor in dervatives of position
+                if difMag > 5e-10:
+                    self.accelerate(float(difX) / difMag, float(difY) / difMag)
+                else:
+                    self.accelerate(0,0)
         else:
-            difX = pitchObject.posX - self.posX
-            difY = pitchObject.posY - self.posY
-            difMag = abs(difX) + abs(difY)
-            if difMag > 0:
-                self.accelerate(float(difX) / difMag, float(difY) / difMag)
+            self.chase(pitchObject)
 
     def getWeightedDistanceToGoal(self, attacking):
         return self.getDistanceToGoalline(attacking) + abs(self.posY - FIELD_WIDTH / 2) * 5/4

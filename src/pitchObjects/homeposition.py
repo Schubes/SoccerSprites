@@ -1,3 +1,4 @@
+import pygame
 from display.displaymapper import FIELD_LENGTH, FIELD_WIDTH
 from gamevariables import STRAT_HOME_POS_SIZE, COLOR_ORANGE
 from pitchObjects.pitchobject import PitchObject
@@ -23,7 +24,8 @@ class HomePosition(PitchObject):
         PitchObject.update(self)
 
     def ballModifierX(self):
-        return (self.ball.posX - FIELD_LENGTH/2)/4
+        #TODO: use time * transistionspeed
+        return (self.ball.posX - FIELD_LENGTH/2)/10
 
     def ballModifierY(self):
         balltracking = (self.ball.posY - FIELD_WIDTH/2) * 2/3 * abs(self.defaultPosY - self.ball.posY)/FIELD_WIDTH
@@ -53,10 +55,5 @@ class HomePosition(PitchObject):
                 return self.defaultPosX * setPieceMultiplier
             else:
                 return (self.defaultPosX - FIELD_LENGTH) * setPieceMultiplier
-        elif not self.ball.outOfPlay:
-            if self.team.isDefendingLeft:
-                return self.defaultPosX/4
-            else:
-                return (self.defaultPosX - FIELD_LENGTH)/4
         else:
             return 0
