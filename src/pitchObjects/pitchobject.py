@@ -1,4 +1,5 @@
 import pygame
+import math
 from display.displaymapper import convertFieldPosition, FIELD_LENGTH
 from gamevariables import GAME_FPS
 
@@ -41,8 +42,8 @@ class PitchObject(pygame.sprite.DirtySprite):
         else:
             return abs(self.posX-FIELD_LENGTH)
 
-    def squaredDistanceTo(self, pitchObject):
-        return ((self.posX - pitchObject.posX)**2) + ((self.posY - pitchObject.posY)**2)
+    def getDistanceTo(self, pitchObject):
+        return math.sqrt(((self.posX - pitchObject.posX)**2) + ((self.posY - pitchObject.posY)**2))
 
     def relX(self, posX, defendingLeft):
         if defendingLeft:

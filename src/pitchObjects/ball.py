@@ -88,24 +88,25 @@ class Ball(PitchObject):
             controlVal = 0
 
             for player in players:
-                if self.possessor:
-                    if player.team is self.possessor.team:
-                        controlVal += 1
-                    else:
-                        controlVal -= 1
+                if not player.recovering:
+                    if self.possessor:
+                        if player.team is self.possessor.team:
+                            controlVal += 1
+                        else:
+                            controlVal -= 1
 
-                    for player in players:
-                        if not player.recovering:
-                            if controlVal > 0:
-                                winningPlayer = self.possessor
-                                break
-                            elif controlVal <= 0:
-                                if player.team.isDefendingLeft:
-                                    winningPlayer = player
+                        for player in players:
+                            if not player.recovering:
+                                if controlVal > 0:
+                                    winningPlayer = self.possessor
                                     break
-                else:
-                    if not player.recovering:
-                        winningPlayer = random.choice(players)
+                                elif controlVal <= 0:
+                                    if player.team is not self.possessor.team:
+                                        winningPlayer = player
+                                        break
+                    else:
+                        if not player.recovering:
+                            winningPlayer = random.choice(players)
 
         if winningPlayer:
             if self.possessor != winningPlayer:

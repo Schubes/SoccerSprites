@@ -29,8 +29,8 @@ class FieldPlayer(PitchObject):
         self.covering = []
         self.blocking = []
         self.marking = None
-        self.isBlockedBy = []
-        self.isCoveredBy = []
+        self.blockedBy = []
+        self.coveredBy = []
         self.recovering = 0 #If the player has recently lost the ball, they are recovering and cannot touch the ball
         self.chargeToBall = False
         self.speed = float(ATTR_PLAYER_SPEED)
@@ -103,6 +103,7 @@ class FieldPlayer(PitchObject):
         self.ball.passTo(teammates[0])
 
     def lookToPass(self, grandObserver):
+        print len(grandObserver.openPlayers)
         if grandObserver.openPlayers:
             # TODO: introduce some intelligent randomness
             bestPassOption = self
@@ -149,7 +150,7 @@ class FieldPlayer(PitchObject):
             self.cover(self.ball)
 
     def nearBall(self):
-        if self.squaredDistanceTo(self.ball) < STRAT_NEAR_BALL:
+        if self.getDistanceTo(self.ball) < STRAT_NEAR_BALL:
             return True
         else:
             return False

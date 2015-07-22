@@ -21,9 +21,9 @@ GAME_FPS = 30
 
 STRAT_HOME_POS_SIZE = [convertYards2Pixels(10), convertYards2Pixels(10)]
 STRAT_COVERAGE = 3**2 #Yards Squared
-STRAT_BLOCKAGE = math.radians(20) #Theta difference in radians
-STRAT_NEAR_BALL = 5**2 #Yards Squared
-STRAT_MIN_PASS = 12
+STRAT_BLOCKAGE = math.radians(30) #Theta difference in radians
+STRAT_NEAR_BALL = 5 #Yards
+STRAT_MIN_PASS = 12 #Yards
 STRAT_TRY_CROSSING = 15 #Yards from goalline before attempting a cross
 
 ATTR_PLAYER_SPEED = float(400)/GAME_FPS
