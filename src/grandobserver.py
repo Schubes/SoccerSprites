@@ -3,7 +3,7 @@ import math
 import pygame
 
 from display.displaymapper import FIELD_WIDTH
-from gamevariables import STRAT_BLOCKAGE, STRAT_COVERAGE
+from gamevariables import STRAT_BLOCKAGE, STRAT_COVERAGE, STRAT_MIN_PASS
 
 
 __author__ = 'Thomas'
@@ -87,7 +87,7 @@ class GrandObserver:
                     angleDif = abs(((defendingAngle - passingAngle + math.pi) % (2 * math.pi)) - math.pi)
                     stratBlockage = STRAT_BLOCKAGE
                     if self.ball.possessor:
-                        if defendingPlayer.getDistanceTo(self.ball) < 5:
+                        if defendingPlayer.getDistanceTo(self.ball) < STRAT_MIN_PASS:
                             stratBlockage = math.radians(60)
                     if angleDif < stratBlockage:
                         attackingPlayer.blockedBy += [defendingPlayer]
