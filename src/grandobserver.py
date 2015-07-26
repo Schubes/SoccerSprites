@@ -96,9 +96,8 @@ class GrandObserver:
                 # if the defending player is nearby and closer to the goal
                 if (attackingPlayer.posX - defendingPlayer.posX) ** 2 + (
                             attackingPlayer.posY - defendingPlayer.posY) ** 2 < STRAT_COVERAGE:
-                    if not self.attackerIsCloserToGoalline(attackingPlayer, defendingPlayer):
-                        attackingPlayer.coveredBy += [defendingPlayer]
-                        defendingPlayer.covering += [attackingPlayer]
+                    attackingPlayer.coveredBy += [defendingPlayer]
+                    defendingPlayer.covering += [attackingPlayer]
 
     def setOffsides(self, attackingTeam):
         for attackingPlayer in attackingTeam.players:

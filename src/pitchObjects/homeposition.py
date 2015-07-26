@@ -19,13 +19,14 @@ class HomePosition(PitchObject):
         PitchObject.__init__(self, COLOR_ORANGE, self.defaultPosX, self.defaultPosY, STRAT_HOME_POS_SIZE)
 
     def update(self):
-        self.posX = self.defaultPosX + self.ballModifierX() + self.attackingModifierX()
+        self.posX = self.defaultPosX + self.attackingModifierX() + self.ballModifierX() + self.setPiecesModifierX()
         self.posY = self.defaultPosY + self.ballModifierY() + self.defendingModifierY()
         PitchObject.update(self)
 
     def ballModifierX(self):
-        #TODO: use time * transistionspeed
-        return (self.ball.posX - FIELD_LENGTH/2)/10
+        if self.team.hasPossession:
+            return (self.ball.posX - FIELD_LENGTH/2)/10
+        return 0
 
     def ballModifierY(self):
         balltracking = (self.ball.posY - FIELD_WIDTH/2) * 2/3 * abs(self.defaultPosY - self.ball.posY)/FIELD_WIDTH
@@ -35,9 +36,9 @@ class HomePosition(PitchObject):
             overloadingBox = (FIELD_WIDTH/2 - self.defaultPosY)/(50/(self.posX-90))
         else:
             if self.posX > FIELD_LENGTH/2:
-                overloadingBox = (FIELD_WIDTH/2 - self.defaultPosY)/(100/(self.posX + 1 - FIELD_LENGTH))/2
+                overloadingBox = (FIELD_WIDTH/2 - self.defaultPosY)/(100/(self.posX + 1 - FIELD_LENGTH))/3
             else:
-                overloadingBox = (FIELD_WIDTH/2 - self.defaultPosY)/(100/(self.posX + 1))/2
+                overloadingBox = (FIELD_WIDTH/2 - self.defaultPosY)/(100/(self.posX + 1))/3
         return balltracking + overloadingBox
 
     def defendingModifierY(self):
@@ -48,12 +49,19 @@ class HomePosition(PitchObject):
 
     def attackingModifierX(self):
         if self.team.hasPossession:
-            setPieceMultiplier = 1
-            if self.ball.outOfPlay is "GoalKick" or self.ball.outOfPlay is "CornerKick":
-                setPieceMultiplier = 2
+            push = self.ball.possessionController.getTimeOfPossession()/250
             if self.team.isDefendingLeft:
-                return self.defaultPosX * setPieceMultiplier
+                return push + 20
             else:
-                return (self.defaultPosX - FIELD_LENGTH) * setPieceMultiplier
+                return push - 20
         else:
             return 0
+
+
+    def setPiecesModifierX(self):
+        if self.team.hasPossession and (self.ball.outOfPlay is "GoalKick") or (self.ball.outOfPlay is "CornerKick"):
+            if self.team.isDefendingLeft:
+                return 20
+            else:
+                return -20
+        return 0

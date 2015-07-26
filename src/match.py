@@ -31,7 +31,7 @@ class Match:
         self.allPlayers = pygame.sprite.LayeredDirty()
         self.team1.setStartingLineUp((4, 3, 3), self.ball, window)
         self.allPlayers.add(self.team1.players)
-        self.team2.setStartingLineUp((4,1,2,1,2), self.ball, window)
+        self.team2.setStartingLineUp((4, 3,3), self.ball, window)
         self.allPlayers.add(self.team2.players)
 
         #OBJECTS TO BE DRAWN

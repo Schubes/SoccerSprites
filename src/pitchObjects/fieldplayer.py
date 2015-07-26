@@ -1,3 +1,4 @@
+import random
 import pygame
 from display.displaymapper import FIELD_LENGTH, FIELD_WIDTH
 from gamevariables import STRAT_NEAR_BALL, ATTR_PLAYER_SPEED, ATTR_SHOOTING_RANGE, GRAPH_PLAYER_SIZE, ATTR_PLAYER_ACCEL, \
@@ -56,13 +57,16 @@ class FieldPlayer(PitchObject):
         if vectMag > 0:
             vectX = self.speed * vectX / vectMag
             vectY = self.speed * vectY / vectMag
+        else:
+            vectX = 0
+            vectY = 0
 
-            difX = (vectX - self.velX)
-            difY = (vectY - self.velY)
-            difMag = math.sqrt((vectX - self.velX)**2 + (vectY - self.velY)**2)
-            if difMag > 0:
-                self.velX += float(difX)/difMag * self.acceleration
-                self.velY += float(difY)/difMag * self.acceleration
+        difX = (vectX - self.velX)
+        difY = (vectY - self.velY)
+        difMag = math.sqrt((vectX - self.velX)**2 + (vectY - self.velY)**2)
+        if difMag > 0:
+            self.velX += float(difX)/difMag * self.acceleration
+            self.velY += float(difY)/difMag * self.acceleration
 
 
     def move(self):
@@ -85,22 +89,22 @@ class FieldPlayer(PitchObject):
 
     def makePlay(self, grandObserver):
         if self.ball.outOfPlay:
-            self.cross()
+            self.mustPass()
         elif self.isInShootingRange():
             self.ball.simShot(self.team.isDefendingLeft)
         else:
             if not self.lookToPass(grandObserver):
                 if self.getDistanceToGoalline(True) < STRAT_TRY_CROSSING:
-                    self.cross()
+                    self.mustPass()
                 self.makeRun(grandObserver)
 
-    def cross(self):
+    def mustPass(self):
         teammates = sorted(self.team.players, key=lambda x: x.getWeightedDistanceToGoal(True))
         for player in teammates:
             if not player.blockedBy and not player.coveredBy and not player is self:
-                self.ball.passTo(player)
+                self.ball.passTo(player, False)
                 return
-        self.ball.passTo(teammates[0])
+        self.ball.passTo(teammates[0],False)
 
     def lookToPass(self, grandObserver):
         print len(grandObserver.openPlayers)
@@ -114,7 +118,7 @@ class FieldPlayer(PitchObject):
                     bestPassOption = openPlayer
                     break
             if bestPassOption is not self:
-                self.ball.passTo(bestPassOption)
+                self.ball.passTo(bestPassOption, True)
                 return True
         return False
 
@@ -123,6 +127,7 @@ class FieldPlayer(PitchObject):
         # TODO: make smarter runs and be more aggressive in front of goal
         if self.ball.outOfPlay is "Kickoff":
             pass
+        # If about to go offsides run back onsides
         elif grandObserver.lastDefender.getDistanceToGoalline(False) > self.getDistanceToGoalline(True) \
                 < self.ball.getDistanceToGoalline(True, self.team.isDefendingLeft) and \
                         self.getDistanceToGoalline(True) < FIELD_LENGTH/2:
@@ -131,7 +136,11 @@ class FieldPlayer(PitchObject):
             if self.ball.target is self:
                 self.intercept(self.ball)
             elif self.hasBall:
-                self.accelerate( self.dirX(1), 0)
+                if len(grandObserver.openPlayers) > len(self.team.players)/2:
+                    print "whee"
+                    self.mustPass()
+                else:
+                    self.accelerate( self.dirX(1), 0)
             else:
                 self.chase(self.homePosition)
 

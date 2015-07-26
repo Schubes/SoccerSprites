@@ -1,3 +1,5 @@
+import pygame
+
 __author__ = 'Thomas'
 
 class PossessionController:
@@ -5,6 +7,8 @@ class PossessionController:
     def __init__(self, team1, team2):
         self.team1 = team1
         self.team2 = team2
+        self.possession = 0
+        self.possessionTimeStart = 0
 
     def noPossession(self):
         self.team1.hasPossession = False
@@ -12,6 +16,7 @@ class PossessionController:
 
     def setPossession(self, team):
         assert (team is self.team1) or (team is self.team2)
+        print "possession change"
         if team is self.team1:
             self.team1.hasPossession = True
             self.team2.hasPossession = False
@@ -28,6 +33,18 @@ class PossessionController:
             assert ball.possessor is None
             self.setPossession(ball.prevPossessor.team)
             self.switchPossession(ball)
+
+    def getTimeOfPossession(self):
+        if self.team1.hasPossession:
+            self.possession += pygame.time.get_ticks() - self.possessionTimeStart
+            if self.possession > 5000:
+                self.possession = 5000
+        else:
+            self.possession -= pygame.time.get_ticks() - self.possessionTimeStart
+            if self.possession < -5000:
+                self.possession = -5000
+        self.possessionTimeStart = pygame.time.get_ticks()
+        return self.possession
 
     def getTeamWithPossession(self):
         assert not (self.team1.hasPossession and self.team2.hasPossession)

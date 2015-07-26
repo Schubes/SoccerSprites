@@ -40,17 +40,21 @@ class Ball(PitchObject):
         self.velX = (goalX - self.posX)/(math.sqrt((goalY - self.posY)**2 + (goalX - self.posX)**2)) * MECH_BALL_SPEED
         self.velY = (goalY - self.posY)/(math.sqrt((goalY - self.posY)**2 + (goalX - self.posX)**2)) * MECH_BALL_SPEED
 
-    def passTo(self, player):
+    def passTo(self, player, throughPass):
+        assert player is not self
         print "Passed"
         self.kicked()
         self.target = player
-
-        difX = player.posX - self.posX + player.velX / MECH_PASS_VEL_MODIFIER #Just a magic number that works well
-        difY = player.posY - self.posY + player.velY / MECH_PASS_VEL_MODIFIER
+        if throughPass:
+            difX = player.posX - self.posX + player.velX / MECH_PASS_VEL_MODIFIER #Just a magic number that works well
+            difY = player.posY - self.posY + player.velY / MECH_PASS_VEL_MODIFIER
+        else:
+            difX = player.posX - self.posX
+            difY = player.posY - self.posY
         difMag = math.sqrt(difX**2 + difY**2)
-
-        self.velX = difX/difMag * MECH_BALL_SPEED
-        self.velY = difY/difMag * MECH_BALL_SPEED
+        if difMag > 0:
+            self.velX = difX/difMag * MECH_BALL_SPEED
+            self.velY = difY/difMag * MECH_BALL_SPEED
 
     def kicked(self):
         """sets properties when ball is willingly given up"""
@@ -109,17 +113,25 @@ class Ball(PitchObject):
                             winningPlayer = random.choice(players)
 
         if winningPlayer:
-            if self.possessor != winningPlayer:
+            if not self.possessor is winningPlayer:
                 if self.possessor:
                     self.possessor.recovering = MECH_TURNS_RECOVERING
                     self.possessor.hasBall = False
                     self.prevPossessor = self.possessor
+                    if not self.possessor.team is winningPlayer.team:
+                        self.possessionController.setPossession(winningPlayer.team)
+                elif self.prevPossessor:
+                    if not self.prevPossessor.team is winningPlayer.team:
+                        self.possessionController.setPossession(winningPlayer.team)
+                else:
+                    self.possessionController.setPossession(winningPlayer.team)
                 self.possessor = winningPlayer
+
 
             self.target = None
             self.isLoose = False
             self.possessor.hasBall = True
-            self.possessionController.setPossession(self.possessor.team)
+
 
             if winningPlayer.isOffsides and self.isLoose and not self.outOfPlay:
                 print "OFFSIDES!!!!"
