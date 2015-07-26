@@ -78,12 +78,12 @@ class Ball(PitchObject):
     def moveBall(self):
         #if there is a player controlling the ball, the ball should move with that player
         if self.possessor is not None:
+            #put the ball in front of the player
             self.posX = self.possessor.posX
             self.posY = self.possessor.posY
-            self.velX = 0
-            self.velY = 0
-        else:
-            PitchObject.move(self)
+            self.velX = self.possessor.velX
+            self.velY = self.possessor.velY
+        PitchObject.move(self)
 
     def evaluateControl(self, players):
         players = pygame.sprite.spritecollide(self, players, False)
