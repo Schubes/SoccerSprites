@@ -47,9 +47,12 @@ class Match:
 
 
     def playMatchTurn(self):
+        #Match Logic
         self.grandObserver.analyze()
         self.allPlayers.update(self.grandObserver)
         self.ballGroup.update(self.allPlayers)
+
+        #Handle Graphic Display
         self.allPitchObjects.draw(self.pitchSurface)
         self.allPitchObjects.clear(self.pitchSurface, self.fieldBackground)
         self.window.blit(self.pitchSurface, (0, WINDOW_HEADER_HEIGHT))

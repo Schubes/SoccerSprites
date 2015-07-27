@@ -21,6 +21,7 @@ class HomePosition(PitchObject):
     def update(self):
         self.posX = self.defaultPosX + self.attackingModifierX() + self.ballModifierX() + self.setPiecesModifierX()
         self.posY = self.defaultPosY + self.ballModifierY() + self.defendingModifierY()
+
         PitchObject.update(self)
 
     def ballModifierX(self):
@@ -59,9 +60,15 @@ class HomePosition(PitchObject):
 
 
     def setPiecesModifierX(self):
-        if self.team.hasPossession and (self.ball.outOfPlay is "GoalKick") or (self.ball.outOfPlay is "CornerKick"):
-            if self.team.isDefendingLeft:
-                return 20
+        if (self.ball.outOfPlay is "GoalKick") or (self.ball.outOfPlay is "CornerKick"):
+            if self.team.hasPossession:
+                if self.team.isDefendingLeft:
+                    return 20
+                else:
+                    return -20
             else:
-                return -20
+                if self.team.isDefendingLeft:
+                    return -20
+                else:
+                    return 20
         return 0

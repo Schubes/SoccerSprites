@@ -3,7 +3,7 @@ import pygame
 import math
 from display.displaymapper import FIELD_LENGTH, FIELD_WIDTH
 from gamevariables import COLOR_BALL, GRAPH_BALL_SIZE, MECH_BALL_SPEED, MECH_BALL_SIZE, MECH_TURNS_RECOVERING, \
-    MECH_PASS_VEL_MODIFIER
+    MECH_PASS_VEL_MODIFIER, MECH_GRASS_FRICTION
 from pitchObjects.pitchobject import PitchObject
 
 __author__ = 'Thomas'
@@ -83,7 +83,16 @@ class Ball(PitchObject):
             self.posY = self.possessor.posY
             self.velX = self.possessor.velX
             self.velY = self.possessor.velY
+            #I don't really like calling move twice in one turn, but for now it looks good.
+            PitchObject.move(self)
+        else:
+            speed = (math.sqrt(self.velX**2 + self.velY**2))
+            print speed
+            if speed > 0:
+                self.velX += - self.velX * MECH_GRASS_FRICTION
+                self.velY += - self.velY * MECH_GRASS_FRICTION
         PitchObject.move(self)
+
 
     def evaluateControl(self, players):
         players = pygame.sprite.spritecollide(self, players, False)
