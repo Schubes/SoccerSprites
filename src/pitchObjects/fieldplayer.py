@@ -37,14 +37,8 @@ class FieldPlayer(PitchObject):
         self.maxSpeed = float(ATTR_PLAYER_SPEED)
         self.acceleration = float(ATTR_PLAYER_ACCEL)
 
-
-    def isInShootingRange(self):
-        if self.getWeightedDistanceToGoal(True) < self.shootingRange:
-            return True
-        else:
-            return False
-
     def update(self, grandObserver):
+        """ This nethod is called by matchturn using existing pygame.sprite implementation"""
         if self.recovering:
             self.recovering -= 1
         self.homePosition.update()
@@ -53,6 +47,9 @@ class FieldPlayer(PitchObject):
         PitchObject.update(self)
 
     def accelerate(self, vectX, vectY):
+        """ This method changes the direction of the player to match the input vector as quickly as possible.
+        This method should only be called once per update call.
+        """
         vectMag = math.sqrt(vectX**2 + vectY**2)
         if vectMag > 0:
             vectX = self.maxSpeed * vectX / vectMag
@@ -70,7 +67,9 @@ class FieldPlayer(PitchObject):
 
 
     def move(self):
-        #Players can't move at the speed of rocket ships.
+        """
+        Ensures the player does not move faster the its maximum speed and updates the player position
+        """
         # if self.hasBall:
         #     if math.sqrt(self.velY**2 + self.velX**2) > (float(4)/5 * self.maxSpeed):
         #         self.velX = float(4)/5 * self.maxSpeed * self.velX/math.sqrt(self.velY**2 + self.velX**2)
@@ -81,6 +80,9 @@ class FieldPlayer(PitchObject):
         PitchObject.move(self)
 
     def makeAction(self, grandObserver):
+        """
+        Calls the appropriate action logic for the player based on possession and ball control status.
+        """
         if self.team.hasPossession:
             if self.hasBall:
                 self.makePlay(grandObserver)
@@ -92,25 +94,25 @@ class FieldPlayer(PitchObject):
             self.defend()
 
     def makePlay(self, grandObserver):
+        """
+        Logic for the player who possesses the ball
+        """
         if self.ball.outOfPlay:
             self.mustPass()
         elif self.isInShootingRange():
-            self.ball.simShot(self.team.isDefendingLeft)
+            self.ball.shoot(self.team.isDefendingLeft)
         else:
             if not self.lookToPass(grandObserver):
                 if self.getDistanceToGoalline(True) < STRAT_TRY_CROSSING:
                     self.mustPass()
                 self.makeRun(grandObserver)
 
-    def mustPass(self):
-        teammates = sorted(self.team.players, key=lambda x: x.getWeightedDistanceToGoal(True))
-        for player in teammates:
-            if not player.blockedBy and not player.coveredBy and not player is self:
-                self.ball.passTo(player, False)
-                return
-        self.ball.passTo(teammates[0],False)
-
     def lookToPass(self, grandObserver):
+        """
+
+        :param grandObserver:
+        :return: Boolean (if good pass was found)
+        """
         if grandObserver.openPlayers:
             # TODO: introduce some intelligent randomness
             bestPassOption = self
@@ -125,8 +127,20 @@ class FieldPlayer(PitchObject):
                 return True
         return False
 
+    def mustPass(self):
+        """
+        For situations where a pass is required, eg. throwins
+        """
+        teammates = sorted(self.team.players, key=lambda x: x.getWeightedDistanceToGoal(True))
+        for player in teammates:
+            if not player.blockedBy and not player.coveredBy and not player is self:
+                self.ball.passTo(player, False)
+                return
+        self.ball.passTo(teammates[0],False)
+
 
     def makeRun(self, grandObserver):
+        """ handles and prioritizes all offensive movement"""
         # During Kickoffs, don't move
         if self.ball.outOfPlay is "Kickoff":
             pass
@@ -170,6 +184,7 @@ class FieldPlayer(PitchObject):
 
 
     def defend(self):
+        """ handles and prioritizes all defensive movement"""
         if self.ball.outOfPlay:
             self.chase(self.homePosition)
             return
@@ -209,13 +224,10 @@ class FieldPlayer(PitchObject):
             self.cover(self.ball)
             return
 
-    def nearBall(self):
-        if self.getDistanceTo(self.ball) < STRAT_NEAR_BALL:
-            return True
-        else:
-            return False
-
     def cover(self, pitchObject):
+        """ If the player is between the goal and the pitchObject, returns True
+        Otherwise, moves the player in between the pitchObject and the goal, returns False
+        """
         if self.team.isDefendingLeft:
             object2goalvectX = 0 - pitchObject.posX
             self2goalvectX = 0 - self.posX
@@ -253,6 +265,9 @@ class FieldPlayer(PitchObject):
             self.accelerate(float(difX) / difMag, float(difY) / difMag)
 
     def intercept(self, pitchObject):
+        """ This method is primarily used to recieve passes, moves the player to a point where the pitchObject will
+        arrive, or if the object is not moving chases it.
+        """
         objectSpeed = math.sqrt(pitchObject.velX**2 + pitchObject.velY**2)
         if objectSpeed > 0:
             objXnorm = pitchObject.velX/objectSpeed
@@ -273,6 +288,18 @@ class FieldPlayer(PitchObject):
                     self.accelerate(0,0)
         else:
             self.chase(pitchObject)
+
+    def nearBall(self):
+        if self.getDistanceTo(self.ball) < STRAT_NEAR_BALL:
+            return True
+        else:
+            return False
+
+    def isInShootingRange(self):
+        if self.getWeightedDistanceToGoal(True) < self.shootingRange:
+            return True
+        else:
+            return False
 
     def getWeightedDistanceToGoal(self, attacking):
         return self.getDistanceToGoalline(attacking) + abs(self.posY - FIELD_WIDTH / 2) * 5/4

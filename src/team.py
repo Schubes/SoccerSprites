@@ -16,10 +16,6 @@ class Team:
     def setStartingLineUp(self, formation, ball, window):
         players = []
         # TODO: Maybe make new class for goalies
-        # if self.isDefendingLeft:
-        #     players.append(FieldPlayer("GK", self, ball, 5, FIELD_WIDTH/2))
-        # else:
-        #     players.append(FieldPlayer("GK", self, ball, (FIELD_LENGTH - 5), FIELD_WIDTH/2))
         for lineNum, line in enumerate(formation):
             for posNum, position in enumerate(range(line)):
                 perX = float(lineNum + 1)/len(formation)

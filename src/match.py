@@ -38,7 +38,7 @@ class Match:
         self.allPlayers = pygame.sprite.LayeredDirty()
         self.team1.setStartingLineUp((4, 3, 3), self.ball, window)
         self.allPlayers.add(self.team1.players)
-        self.team2.setStartingLineUp((4, 3,3), self.ball, window)
+        self.team2.setStartingLineUp((4, 3, 3), self.ball, window)
         self.allPlayers.add(self.team2.players)
 
         #OBJECTS TO BE DRAWN
@@ -54,6 +54,7 @@ class Match:
 
 
     def playMatchTurn(self):
+        """This method ought to be repeatedly called in a while loop in the class instantiated match.py"""
         #Match Logic
         self.grandObserver.analyze()
         self.allPlayers.update(self.grandObserver)
@@ -67,6 +68,7 @@ class Match:
 
 
     def createPitchSurface(self):
+        """Draws all the markings for a standard soccer field"""
         pitchSurface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT - WINDOW_HEADER_HEIGHT))
         pitchSurface.fill(COLOR_GRASS)
 

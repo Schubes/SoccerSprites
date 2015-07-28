@@ -19,7 +19,12 @@ class GrandObserver:
         self.stoppingPlayer = None
 
     def analyze(self):
+        """
+        Examines the current relationships between the players and the ball. Sets flags on particular players to help
+        guide their personal decisions when they are updated.
+        """
         # TODO: optimize these functions to reduce repeated looping
+        # I'm not actually sure how much time I am losing here, might be worth testing before refactoring everything
         if self.team1.hasPossession:
             attackingTeam = self.team1
             defendingTeam = self.team2

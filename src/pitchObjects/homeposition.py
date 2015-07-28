@@ -6,6 +6,9 @@ from pitchObjects.pitchobject import PitchObject
 __author__ = 'Thomas'
 
 class HomePosition(PitchObject):
+    """
+    This class defines the area of the field that a particular player is responsible for at any given moment.
+    """
     def __init__(self, playerRole, team, ball):
         self.team = team
         self.ball = ball
@@ -48,7 +51,7 @@ class HomePosition(PitchObject):
 
     def attackingModifierX(self):
         if self.team.hasPossession:
-            push = self.ball.possessionController.getTimeOfPossession()/250
+            push = self.ball.possessionController.getRecentPossessionTime()/250
             if self.team.isDefendingLeft:
                 return push + 20
             else:

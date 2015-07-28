@@ -1,6 +1,8 @@
 import math
 from display.displaymapper import convertYards2Pixels
 
+"""This file holds Constant referenced throughout the codebase."""
+
 __author__ = 'Thomas'
 
 COLOR_GRASS = (40, 210, 40)

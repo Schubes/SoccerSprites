@@ -3,7 +3,11 @@ import pygame
 __author__ = 'Thomas'
 
 class PossessionController:
-    """class to handle changes in possession on the team model"""
+    """Class to handle changes in possession on the team model
+    It also keeps track of recent possession time
+    """
+    #TODO: have it keep track of overall possession stats as well
+
     def __init__(self, team1, team2):
         self.team1 = team1
         self.team2 = team2
@@ -34,7 +38,8 @@ class PossessionController:
             self.setPossession(ball.prevPossessor.team)
             self.switchPossession(ball)
 
-    def getTimeOfPossession(self):
+    def getRecentPossessionTime(self):
+        #TODO: update this only once per turn
         if self.team1.hasPossession:
             self.possession += pygame.time.get_ticks() - self.possessionTimeStart
             if self.possession > 5000:

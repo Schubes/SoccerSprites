@@ -1,3 +1,7 @@
+"""
+This file holds the variables and class to handle the mapping between yards and the pixels. This allows the match logic
+to be computed in the more comfortable unit of yards and be properly displayed on whatever the current window size is.
+"""
 
 __author__ = 'Thomas'
 
