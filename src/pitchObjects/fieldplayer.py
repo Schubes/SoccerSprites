@@ -71,11 +71,11 @@ class FieldPlayer(PitchObject):
 
     def move(self):
         #Players can't move at the speed of rocket ships.
-        if self.hasBall:
-            if math.sqrt(self.velY**2 + self.velX**2) > (float(4)/5 * self.maxSpeed):
-                self.velX = float(4)/5 * self.maxSpeed * self.velX/math.sqrt(self.velY**2 + self.velX**2)
-                self.velY = float(4)/5 * self.maxSpeed * self.velY/math.sqrt(self.velY**2 + self.velX**2)
-        elif math.sqrt(self.velY**2 + self.velX**2) > self.maxSpeed:
+        # if self.hasBall:
+        #     if math.sqrt(self.velY**2 + self.velX**2) > (float(4)/5 * self.maxSpeed):
+        #         self.velX = float(4)/5 * self.maxSpeed * self.velX/math.sqrt(self.velY**2 + self.velX**2)
+        #         self.velY = float(4)/5 * self.maxSpeed * self.velY/math.sqrt(self.velY**2 + self.velX**2)
+        if math.sqrt(self.velY**2 + self.velX**2) > self.maxSpeed:
             self.velX = self.maxSpeed * self.velX/math.sqrt(self.velY**2 + self.velX**2)
             self.velY = self.maxSpeed * self.velY/math.sqrt(self.velY**2 + self.velX**2)
         PitchObject.move(self)
@@ -111,7 +111,6 @@ class FieldPlayer(PitchObject):
         self.ball.passTo(teammates[0],False)
 
     def lookToPass(self, grandObserver):
-        print len(grandObserver.openPlayers)
         if grandObserver.openPlayers:
             # TODO: introduce some intelligent randomness
             bestPassOption = self
@@ -128,23 +127,35 @@ class FieldPlayer(PitchObject):
 
 
     def makeRun(self, grandObserver):
-        # TODO: make smarter runs and be more aggressive in front of goal
+        # During Kickoffs, don't move
         if self.ball.outOfPlay is "Kickoff":
             pass
+
         # If about to go offsides run back onsides
         elif grandObserver.lastDefender.getDistanceToGoalline(False) > self.getDistanceToGoalline(True) \
                 < self.ball.getDistanceToGoalline(True, self.team.isDefendingLeft) and \
                         self.getDistanceToGoalline(True) < FIELD_LENGTH/2:
             self.accelerate( -self.dirX(1), 0)
             return
+
         else:
-            #If the player is the intended recipient of a pass try to recieve it
+            #If the player is the intended recipient of a pass try to receive it
             if self.ball.target is self:
                 self.intercept(self.ball)
                 return
+            #If the player has the ball, move towards the goal, or if that is blocked, move towards open space
             elif self.hasBall:
-                self.accelerate( self.dirX(1), 0)
-                return
+                if pygame.sprite.collide_rect(self, self.homePosition):
+                    if grandObserver.stoppingPlayer.getDistanceTo(self) < STRAT_NEAR_BALL:
+                        # run along a right angle to the defender
+                        if self.team.isDefendingLeft:
+                            if grandObserver.stoppingPlayer.posX - self.posX < 0:
+                                print "oops"
+                        self.accelerate(grandObserver.stoppingPlayer.posX - self.posX, grandObserver.stoppingPlayer.posY - self.posY)
+                        return
+                    else:
+                        self.accelerate(1,0)
+                        return
             elif pygame.sprite.collide_rect(self, self.homePosition):
                 if self.ball.possessor:
                     if abs(self.posY - FIELD_WIDTH/2) - abs(self.ball.possessor.posY - FIELD_WIDTH/2) > 0:
@@ -167,12 +178,11 @@ class FieldPlayer(PitchObject):
             if self.cover(self.ball):
                 self.chase(self.ball)
             return
-        if self.marking:
-            self.cover(self.marking)
-            return
-
         if not pygame.sprite.collide_rect(self, self.homePosition):
             self.chase(self.homePosition)
+            return
+        if self.marking:
+            self.cover(self.marking)
             return
 
         self.team.players.sort(key=lambda x: x.getDistanceTo(self))
@@ -230,7 +240,7 @@ class FieldPlayer(PitchObject):
 
         difX = (selfXnorm - objXnorm)
         difY = (selfYnorm - objYnorm)
-        if abs(difX) > 0 and abs(difY) > 0:
+        if abs(difX) > 1 and abs(difY) > 1:
             self.accelerate(selfXnorm - objXnorm, selfYnorm - objYnorm)
             return False
         return True

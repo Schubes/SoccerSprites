@@ -19,7 +19,7 @@ PAINT_WIDTH = 3
 
 GAME_FPS = 30
 
-STRAT_HOME_POS_SIZE = [convertYards2Pixels(10), convertYards2Pixels(10)]
+STRAT_HOME_POS_SIZE = [convertYards2Pixels(15), convertYards2Pixels(15)]
 STRAT_COVERAGE = 3**2 #Yards Squared
 STRAT_BLOCKAGE = math.radians(30) #Theta difference in radians
 STRAT_NEAR_BALL = 5 #Yards

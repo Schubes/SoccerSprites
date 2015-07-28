@@ -87,7 +87,6 @@ class Ball(PitchObject):
             PitchObject.move(self)
         else:
             speed = (math.sqrt(self.velX**2 + self.velY**2))
-            print speed
             if speed > 0:
                 self.velX += - self.velX * MECH_GRASS_FRICTION
                 self.velY += - self.velY * MECH_GRASS_FRICTION

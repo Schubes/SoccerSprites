@@ -25,8 +25,6 @@ class HomePosition(PitchObject):
         PitchObject.update(self)
 
     def ballModifierX(self):
-        if self.team.hasPossession:
-            return (self.ball.posX - FIELD_LENGTH/2)/10
         return 0
 
     def ballModifierY(self):

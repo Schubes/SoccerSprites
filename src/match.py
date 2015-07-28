@@ -11,6 +11,7 @@ __author__ = 'Thomas'
 class Match:
     """Handles match gameplay"""
     def __init__(self, window):
+        #Main Windows
         self.window = window
 
         self.header = self.createHeader()
@@ -19,13 +20,19 @@ class Match:
         self.pitchSurface = self.createPitchSurface()
         self.fieldBackground = self.createPitchSurface()
 
+        #Required Initialization of required classes for Match
         self.team1 = Team(True, COLOR_TEAM_BLUE, "Blue Team")
         self.team2 = Team(False, COLOR_TEAM_RED, "Red Team")
 
         self.possessionController = PossessionController(self.team1, self.team2)
 
         self.ball = Ball(self.possessionController)
+
+        self.grandObserver = GrandObserver(self.team1, self.team2, self.ball)
+
         self.ballGroup = pygame.sprite.LayeredDirty(self.ball)
+
+        #Pygame Sprite Groups
 
         #PLAYERS
         self.allPlayers = pygame.sprite.LayeredDirty()
@@ -38,11 +45,11 @@ class Match:
         self.allPitchObjects = pygame.sprite.LayeredDirty(self.allPlayers, self.ballGroup, self.team1.goal, self.team2.goal)
         self.allPitchObjects.move_to_back(self.ball)
 
-        self.ball.posX = FIELD_LENGTH/2
-        self.ball.posY = FIELD_WIDTH/2
+        # For Debugging Home Position
+        # for player in self.team1.players:
+        #     self.allPitchObjects.add(player.homePosition)
 
-        self.grandObserver = GrandObserver(self.team1, self.team2, self.ball)
-
+        # Match Start Time
         self.startTime = pygame.time.get_ticks()
 
 
