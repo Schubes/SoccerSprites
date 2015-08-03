@@ -31,12 +31,11 @@ class Goalie(AbstractPlayer):
             # else:
             self.mustPass()
             return
-        elif self.chargeToBall:
+        elif self.chargeToBall and self.nearBall():
             self.chase(self.ball)
             return
         else:
             if self.cover(self.ball):
-                print self.team.name
                 self.accelerate(0,0)
             return
 

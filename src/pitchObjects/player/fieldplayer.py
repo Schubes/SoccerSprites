@@ -54,13 +54,27 @@ class FieldPlayer(AbstractPlayer):
         """
         if self.ball.outOfPlay:
             self.mustPass()
+            return
         elif self.isInShootingRange():
             self.ball.shoot(self.team.isDefendingLeft)
+            return
         else:
             if not self.lookToPass(grandObserver):
                 if self.getDistanceToGoalline(True) < STRAT_TRY_CROSSING:
                     self.mustPass()
-                self.makeRun(grandObserver)
+                    return
+                self.dribble(grandObserver)
+                return
+
+    def dribble(self, grandObserver):
+        assert self.hasBall
+
+        xdif = grandObserver.stoppingPlayer.posX - self.posX
+        ydif = self.posY - grandObserver.stoppingPlayer.posY
+        if xdif > 2:
+            self.accelerate(xdif, FIELD_WIDTH/2 - self.posY)
+        else:
+            self.accelerate(xdif, ydif)
 
     def makeRun(self, grandObserver):
         """ handles and prioritizes all offensive movement"""
@@ -80,19 +94,6 @@ class FieldPlayer(AbstractPlayer):
             if self.ball.target is self:
                 self.intercept(self.ball)
                 return
-            #If the player has the ball, move towards the goal, or if that is blocked, move towards open space
-            elif self.hasBall:
-                if pygame.sprite.collide_rect(self, self.homePosition):
-                    if grandObserver.stoppingPlayer.getDistanceTo(self) < STRAT_NEAR_BALL:
-                        # run along a right angle to the defender
-                        if self.team.isDefendingLeft:
-                            if grandObserver.stoppingPlayer.posX - self.posX < 0:
-                                print "oops"
-                        self.accelerate(grandObserver.stoppingPlayer.posX - self.posX, grandObserver.stoppingPlayer.posY - self.posY)
-                        return
-                    else:
-                        self.accelerate(1,0)
-                        return
             elif pygame.sprite.collide_rect(self, self.homePosition):
                 if self.ball.possessor:
                     if abs(self.posY - FIELD_WIDTH/2) - abs(self.ball.possessor.posY - FIELD_WIDTH/2) > 0:

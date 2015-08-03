@@ -82,7 +82,7 @@ class AbstractPlayer(PitchObject):
 
         difX = (selfXnorm - objXnorm)
         difY = (selfYnorm - objYnorm)
-        if abs(difX) > 0 and abs(difY) > 0:
+        if (difX**2 + difY**2) > 0:
             self.accelerate(selfXnorm - objXnorm, selfYnorm - objYnorm)
             return False
         return True
@@ -92,6 +92,20 @@ class AbstractPlayer(PitchObject):
         """ This method changes the direction of the player to match the input vector as quickly as possible.
         This method should only be called once per update call.
         """
+
+        if self.velY + self.posY > FIELD_WIDTH:
+            if vectY > 0:
+                vectY = 0
+        elif self.velY + self.posY < 0:
+            if vectY < 0:
+                vectY = 0
+        if self.velX + self.posX > FIELD_LENGTH:
+            if vectX > 0:
+                vectX = 0
+        elif self.velX + self.posX < 0:
+            if vectX < 0:
+                vectX = 0
+
         vectMag = math.sqrt(vectX**2 + vectY**2)
         if vectMag > 0:
             vectX = self.maxSpeed * vectX / vectMag
