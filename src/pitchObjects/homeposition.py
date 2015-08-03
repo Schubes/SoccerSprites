@@ -22,10 +22,12 @@ class HomePosition(PitchObject):
         PitchObject.__init__(self, COLOR_ORANGE, self.defaultPosX, self.defaultPosY, STRAT_HOME_POS_SIZE)
 
     def update(self):
+        self.move()
+        PitchObject.update(self)
+
+    def move(self):
         self.posX = self.defaultPosX + self.attackingModifierX() + self.ballModifierX() + self.setPiecesModifierX()
         self.posY = self.defaultPosY + self.ballModifierY() + self.defendingModifierY()
-
-        PitchObject.update(self)
 
     def ballModifierX(self):
         return 0

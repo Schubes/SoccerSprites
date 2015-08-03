@@ -14,3 +14,9 @@ class Goal(PitchObject):
         posY = FIELD_WIDTH/2
         PitchObject.__init__(self, COLOR_GOAL, posX, posY, GRAPH_GOAL_SIZE)
         PitchObject.update(self)
+
+    def update(self):
+        pass
+
+    def move(self):
+        pass

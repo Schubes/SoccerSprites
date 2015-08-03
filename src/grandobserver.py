@@ -46,8 +46,7 @@ class GrandObserver:
         for attackingPlayer in attackingTeam.players:
             for defendingPlayer in sorted(defendingTeam.players, key=lambda x: abs(x.posX - attackingPlayer.posX) + abs(
                             x.posY - attackingPlayer.posY)):
-                if not defendingPlayer.marking and pygame.sprite.collide_rect(attackingPlayer,
-                                                                              defendingPlayer.homePosition):
+                if not defendingPlayer.marking:
                     defendingPlayer.marking = attackingPlayer
                     break
 

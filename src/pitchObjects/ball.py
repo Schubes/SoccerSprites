@@ -22,12 +22,12 @@ class Ball(PitchObject):
 
     def update(self, players):
         """ method called by matchturn using existing pygame.sprite implementation"""
-        self.moveBall()
+        self.move()
         self.checkOutOfBounds()
         self.evaluateControl(players)
         PitchObject.update(self)
 
-    def moveBall(self):
+    def move(self):
         """ Rolls the ball according to its own velocity or its possessor's, and applies friction coefficient"""
         # if there is a player controlling the ball, the ball should move with that player
         if self.possessor is not None:

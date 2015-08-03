@@ -1,6 +1,7 @@
 from display.displaymapper import FIELD_LENGTH, FIELD_WIDTH
-from pitchObjects.fieldplayer import FieldPlayer
+from pitchObjects.player.fieldplayer import FieldPlayer
 from pitchObjects.goal import Goal
+from pitchObjects.player.goalie import Goalie
 
 __author__ = 'Thomas'
 
@@ -15,7 +16,11 @@ class Team:
 
     def setStartingLineUp(self, formation, ball, window):
         players = []
-        # TODO: Maybe make new class for goalies
+        #Goalie
+
+        players.append(Goalie(self, ball))
+
+        # FieldPlayers
         for lineNum, line in enumerate(formation):
             for posNum, position in enumerate(range(line)):
                 perX = float(lineNum + 1)/len(formation)

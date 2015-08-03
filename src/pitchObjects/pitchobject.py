@@ -1,5 +1,6 @@
 import pygame
 import math
+from abc import ABCMeta, abstractmethod
 from display.displaymapper import convertFieldPosition, FIELD_LENGTH
 from gamevariables import GAME_FPS
 
@@ -7,6 +8,10 @@ __author__ = 'Thomas'
 
 class PitchObject(pygame.sprite.DirtySprite):
     """Super class for fieldPlayers and ball"""
+
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
     def __init__(self, color, posX, posY, size):
         pygame.sprite.DirtySprite.__init__(self)
 
@@ -27,9 +32,16 @@ class PitchObject(pygame.sprite.DirtySprite):
         self.color = color
         self.dirty = 2
 
+    @abstractmethod
     def update(self):
+        """
+        Updates the location on the screen. Any child objects should call this method if they are being displayed.
+
+        :return:
+        """
         self.rect.center = convertFieldPosition(self.posX, self.posY)
 
+    @abstractmethod
     def move(self):
         self.posX += self.velX / GAME_FPS
         self.posY += self.velY / GAME_FPS
