@@ -52,46 +52,55 @@ class Ball(PitchObject):
             the possessor keeps control of the ball.
         """
         players = pygame.sprite.spritecollide(self, players, False)
-        winningPlayer = None
         if players:
-            controlVal = 0
+            winningPlayer = self.determinePossessionWinningPlayer(players)
+            if winningPlayer:
+                self.setPropertiesForPossessionWinningPlayer(winningPlayer)
 
-            for player in players:
-                if not player.recovering:
-                    if self.possessor:
-                        if player.team is self.possessor.team:
-                            controlVal += 1
-                        else:
-                            controlVal -= 1
+    def determinePossessionWinningPlayer(self, players):
+        winningPlayer = None
 
-                        for player in players:
-                            if not player.recovering:
-                                if controlVal > 0:
-                                    winningPlayer = self.possessor
-                                    break
-                                elif controlVal <= 0:
-                                    if player.team is not self.possessor.team:
-                                        winningPlayer = player
-                                        break
-                    else:
-                        if not player.recovering:
-                            winningPlayer = random.choice(players)
-
-        # We want to be careful to only update the possession if there was in fact a change of possession.
-        if winningPlayer:
-            if not self.possessor is winningPlayer:
+        controlVal = 0
+        for player in players:
+            if self.outOfPlay:
+                if not player.team.hasPossession:
+                    break
+            if not player.recovering:
                 if self.possessor:
-                    self.possessor.recovering = MECH_TURNS_RECOVERING
-                    self.possessor.hasBall = False
-                    self.prevPossessor = self.possessor
-                    if not self.possessor.team is winningPlayer.team:
-                        self.possessionController.setPossession(winningPlayer.team)
-                elif self.prevPossessor:
-                    if not self.prevPossessor.team is winningPlayer.team:
-                        self.possessionController.setPossession(winningPlayer.team)
+                    if player.team is self.possessor.team:
+                        controlVal += 1
+                    else:
+                        controlVal -= 1
+
+                    for player in players:
+                        if not player.recovering:
+                            if controlVal > 0:
+                                winningPlayer = self.possessor
+                                break
+                            elif controlVal <= 0:
+                                if player.team is not self.possessor.team:
+                                    winningPlayer = player
+                                    break
                 else:
+                    if not player.recovering:
+                        winningPlayer = random.choice(players)
+
+        return winningPlayer
+
+    def setPropertiesForPossessionWinningPlayer(self, winningPlayer):
+        if not self.possessor is winningPlayer:
+            if self.possessor:
+                self.possessor.recovering = MECH_TURNS_RECOVERING
+                self.possessor.hasBall = False
+                self.prevPossessor = self.possessor
+                if not self.possessor.team is winningPlayer.team:
                     self.possessionController.setPossession(winningPlayer.team)
-                self.possessor = winningPlayer
+            elif self.prevPossessor:
+                if not self.prevPossessor.team is winningPlayer.team:
+                    self.possessionController.setPossession(winningPlayer.team)
+            else:
+                self.possessionController.setPossession(winningPlayer.team)
+            self.possessor = winningPlayer
 
 
             self.target = None
