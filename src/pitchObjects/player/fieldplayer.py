@@ -46,7 +46,7 @@ class FieldPlayer(AbstractPlayer):
             else:
                 self.makeRun(grandObserver)
         else:
-            self.defend()
+            self.defend(grandObserver)
 
     def makePlay(self, grandObserver):
         """
@@ -83,12 +83,8 @@ class FieldPlayer(AbstractPlayer):
             pass
 
         # If about to go offsides run back onsides
-        elif grandObserver.lastDefender.getDistanceToGoalline(False) > self.getDistanceToGoalline(True) \
-                < self.ball.getDistanceToGoalline(True, self.team.isDefendingLeft) and \
-                        self.getDistanceToGoalline(True) < FIELD_LENGTH/2:
-            self.accelerate( -self.dirX(1), 0)
+        elif self.returnOnsides(grandObserver):
             return
-
         else:
             #If the player is the intended recipient of a pass try to receive it
             if self.ball.target is self:
@@ -107,10 +103,12 @@ class FieldPlayer(AbstractPlayer):
                 return
 
 
-    def defend(self):
+    def defend(self, grandObserver):
         """ handles and prioritizes all defensive movement"""
         if self.ball.outOfPlay:
             self.chase(self.homePosition)
+            return
+        elif self.returnOnsides(grandObserver):
             return
         if self.chargeToBall or self.nearBall() and ((self.ball.posX - self.posX) < 0 == self.ball.velX < 0) and \
                 ((self.ball.posY - self.posY) < 0 == self.ball.velY < 0):

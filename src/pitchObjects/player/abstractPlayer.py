@@ -92,19 +92,19 @@ class AbstractPlayer(PitchObject):
         """ This method changes the direction of the player to match the input vector as quickly as possible.
         This method should only be called once per update call.
         """
-
-        if self.velY + self.posY > FIELD_WIDTH:
-            if vectY > 0:
-                vectY = 0
-        elif self.velY + self.posY < 0:
-            if vectY < 0:
-                vectY = 0
-        if self.velX + self.posX > FIELD_LENGTH:
-            if vectX > 0:
-                vectX = 0
-        elif self.velX + self.posX < 0:
-            if vectX < 0:
-                vectX = 0
+        if not self.ball.outOfPlay:
+            if self.velY + self.posY > FIELD_WIDTH:
+                if vectY > 0:
+                    vectY = 0
+            elif self.velY + self.posY < 0:
+                if vectY < 0:
+                    vectY = 0
+            if self.velX + self.posX > FIELD_LENGTH:
+                if vectX > 0:
+                    vectX = 0
+            elif self.velX + self.posX < 0:
+                if vectX < 0:
+                    vectX = 0
 
         vectMag = math.sqrt(vectX**2 + vectY**2)
         if vectMag > 0:
@@ -166,9 +166,11 @@ class AbstractPlayer(PitchObject):
         :return: Boolean (if good pass was found)
         """
         if grandObserver.openPlayers:
-            # TODO: introduce some intelligent randomness
             bestPassOption = self
+            worstPassOption = None
             for openPlayer in grandObserver.openPlayers:
+                if openPlayer is self.ball.prevPossessor:
+                    worstPassOption = openPlayer
                 if openPlayer is self:
                     break
                 if math.sqrt((openPlayer.posY - self.posY)**2 + abs(openPlayer.posX - self.posX)**2) > STRAT_MIN_PASS:
@@ -176,6 +178,10 @@ class AbstractPlayer(PitchObject):
                     break
             if bestPassOption is not self:
                 self.ball.passTo(bestPassOption, True)
+                return True
+            elif worstPassOption:
+                print "and it's played back"
+                self.ball.passTo(worstPassOption, True)
                 return True
         return False
 
@@ -189,6 +195,21 @@ class AbstractPlayer(PitchObject):
                 self.ball.passTo(player, False)
                 return
         self.ball.passTo(teammates[0],False)
+
+    def returnOnsides(self, grandObserver):
+        if self.team.hasPossession:
+            if grandObserver.lastDefender.getDistanceToGoalline(False) > self.getDistanceToGoalline(True) \
+                < self.ball.getDistanceToGoalline(True, self.team.isDefendingLeft) and \
+                self.getDistanceToGoalline(True) < FIELD_LENGTH/2:
+                self.accelerate( -self.dirX(1), 0)
+                return True
+        else:
+            if grandObserver.lastAttacker.getDistanceToGoalline(True) > self.getDistanceToGoalline(True) \
+                    < self.ball.getDistanceToGoalline(True, self.team.isDefendingLeft) and \
+                            self.getDistanceToGoalline(True) < FIELD_LENGTH/2:
+                self.accelerate( -self.dirX(1), 0)
+                return True
+        return False
 
     def nearBall(self):
         if self.getDistanceTo(self.ball) < STRAT_NEAR_BALL:

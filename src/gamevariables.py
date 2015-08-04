@@ -26,7 +26,7 @@ STRAT_COVERAGE = 3**2 #Yards Squared
 STRAT_BLOCKAGE = math.radians(30) #Theta difference in radians
 STRAT_NEAR_BALL = 5 #Yards
 STRAT_MIN_PASS = 12 #Yards
-STRAT_TRY_CROSSING = 7 #Yards from goalline before attempting a cross
+STRAT_TRY_CROSSING = 8 #Yards from goalline before attempting a cross
 STRAT_NEIGHBOR_MIN_DISTANCE = 20
 STRAT_GOALIE_WAIT = 30
 

@@ -47,7 +47,10 @@ class Match:
 
         # For Debugging Home Position
         # for player in self.team1.players:
-        #     self.allPitchObjects.add(player.homePosition)
+        #     try:
+        #         self.allPitchObjects.add(player.homePosition)
+        #     except AttributeError:
+        #         pass
 
         # Match Start Time
         self.startTime = pygame.time.get_ticks()

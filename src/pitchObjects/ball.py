@@ -5,6 +5,7 @@ from display.displaymapper import FIELD_LENGTH, FIELD_WIDTH
 from gamevariables import COLOR_BALL, GRAPH_BALL_SIZE, MECH_BALL_SPEED, MECH_BALL_SIZE, MECH_TURNS_RECOVERING, \
     MECH_PASS_VEL_MODIFIER, MECH_GRASS_FRICTION
 from pitchObjects.pitchobject import PitchObject
+from pitchObjects.player.goalie import Goalie
 
 __author__ = 'Thomas'
 
@@ -17,7 +18,8 @@ class Ball(PitchObject):
         self.possessor = None
         self.prevPossessor = None
         self.isLoose = True
-        self.target = True
+        self.target = None
+        self.shot = False
         self.outOfPlay = "Kickoff"
 
     def update(self, players):
@@ -46,11 +48,7 @@ class Ball(PitchObject):
         PitchObject.move(self)
 
     def evaluateControl(self, players):
-        """Checks if anyone is touching the ball, and determines who has won possession
-        If there are multiple players touching the ball, the team with the most people touching the ball wins possession.
-        If and only if the possessor's team has more players and the possessor is touching the ball,
-            the possessor keeps control of the ball.
-        """
+        """ Checks if anyone is touching the ball, and determines who has won possession """
         players = pygame.sprite.spritecollide(self, players, False)
         if players:
             winningPlayer = self.determinePossessionWinningPlayer(players)
@@ -58,6 +56,10 @@ class Ball(PitchObject):
                 self.setPropertiesForPossessionWinningPlayer(winningPlayer)
 
     def determinePossessionWinningPlayer(self, players):
+        """ If there are multiple players touching the ball, the team with the most people touching the ball wins possession.
+        If and only if the possessor's team has more players and the possessor is touching the ball,
+        the possessor keeps control of the ball.
+        """
         winningPlayer = None
 
         controlVal = 0
@@ -84,21 +86,24 @@ class Ball(PitchObject):
                 else:
                     if not player.recovering:
                         winningPlayer = random.choice(players)
+                        break
+
+        if type(winningPlayer) is Goalie and len(players) == 1:
+            if self.shot:
+                if random.random() > .5:
+                    winningPlayer = None
 
         return winningPlayer
 
     def setPropertiesForPossessionWinningPlayer(self, winningPlayer):
+        assert winningPlayer
+
         if not self.possessor is winningPlayer:
             if self.possessor:
                 self.possessor.recovering = MECH_TURNS_RECOVERING
                 self.possessor.hasBall = False
                 self.prevPossessor = self.possessor
-                if not self.possessor.team is winningPlayer.team:
-                    self.possessionController.setPossession(winningPlayer.team)
-            elif self.prevPossessor:
-                if not self.prevPossessor.team is winningPlayer.team:
-                    self.possessionController.setPossession(winningPlayer.team)
-            else:
+            if not winningPlayer.team.hasPossession:
                 self.possessionController.setPossession(winningPlayer.team)
             self.possessor = winningPlayer
 
@@ -106,20 +111,24 @@ class Ball(PitchObject):
             self.target = None
             self.isLoose = False
             self.possessor.hasBall = True
+            self.shot = False
 
 
             if winningPlayer.isOffsides and self.isLoose and not self.outOfPlay:
                 print "OFFSIDES!!!!"
                 self.linesPersonRuling("SetPiece")
 
-    def shoot(self, rightGoal):
+    def shoot(self, targetGoal):
         """ Sends the ball towards the center of the opposing goal."""
         print "Shot Fired!"
+
+        self.shot = True
+
         self.kicked()
         self.possessionController.noPossession()
 
         goalY = FIELD_WIDTH/2
-        if rightGoal:
+        if targetGoal:
             goalX = FIELD_LENGTH
         else:
             goalX = 0
@@ -193,6 +202,7 @@ class Ball(PitchObject):
             return self.prevPossessor.team.isDefendingLeft
 
     def linesPersonRuling(self, typeOfPlay):
+        print typeOfPlay
         if typeOfPlay is "CornerKick":
             if self.posY > FIELD_WIDTH/2:
                 self.posY = FIELD_WIDTH
@@ -213,6 +223,9 @@ class Ball(PitchObject):
         self.possessionController.switchPossession(self)
         self.prevPossessor = self.possessor
         self.possessor = None
+
+        self.target = None
+        self.shot = False
 
     def getStartingPosX(self):
         return FIELD_LENGTH/2

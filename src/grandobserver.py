@@ -35,7 +35,10 @@ class GrandObserver:
         attackingTeam.players.sort(key=lambda x: x.getDistanceToGoalline(True))
         defendingTeam.players.sort(key=lambda x: x.getDistanceToGoalline(False))
 
-        self.findClosestandLastDefenders(defendingTeam)
+        self.lastDefender = defendingTeam.players[1]  # goalie is excluded
+        self.lastAttacker = attackingTeam.players[-2] # goalie is excluded
+
+        self.findClosestDefenders(defendingTeam)
         self.setCoveredAndBlockedPlayers(attackingTeam, defendingTeam)
         self.setOffsides(attackingTeam)
         self.setOpenPlayers(attackingTeam)
@@ -56,25 +59,24 @@ class GrandObserver:
 
         closestAttacker.chargeToBall = True
 
-    def findClosestandLastDefenders(self, defendingTeam):
-        closestDefender = defendingTeam.players[0]
+    def findClosestDefenders(self, defendingTeam):
+        self.closestDefender = defendingTeam.players[0]
         self.stoppingPlayer = defendingTeam.players[0]
         self.openPlayers = []
-        self.lastDefender = defendingTeam.players[0]  # This works because it has been sorted earlier
         for defendingPlayer in defendingTeam.players:
             defendingPlayer.blocking = []
             defendingPlayer.covering = []
             defendingPlayer.chargeToBall = False
             defendingPlayer.marking = None
 
-            if defendingPlayer.getDistanceTo(self.ball) < closestDefender.getDistanceTo(self.ball):
-                closestDefender = defendingPlayer
+            if defendingPlayer.getDistanceTo(self.ball) < self.closestDefender.getDistanceTo(self.ball):
+                self.closestDefender = defendingPlayer
             if defendingPlayer.getDistanceToGoalline(False) < self.ball.getDistanceToGoalline(False,
                                                                                               defendingPlayer.team.isDefendingLeft):
-                if defendingPlayer.getDistanceTo(self.ball) < closestDefender.getDistanceTo(self.ball):
+                if defendingPlayer.getDistanceTo(self.ball) < self.closestDefender.getDistanceTo(self.ball):
                     self.stoppingPlayer = defendingPlayer
 
-        closestDefender.chargeToBall = True
+        self.closestDefender.chargeToBall = True
         self.stoppingPlayer.chargeToBall = True
 
 
