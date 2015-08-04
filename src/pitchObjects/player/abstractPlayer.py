@@ -54,7 +54,7 @@ class AbstractPlayer(PitchObject):
         if difMag > 0:
             self.accelerate(float(difX) / difMag, float(difY) / difMag)
 
-    def cover(self, pitchObject):
+    def coverObject(self, pitchObject):
         """ If the player is between the goal and the pitchObject, returns True
         Otherwise, moves the player in between the pitchObject and the goal, returns False
         """
@@ -82,10 +82,11 @@ class AbstractPlayer(PitchObject):
 
         difX = (selfXnorm - objXnorm)
         difY = (selfYnorm - objYnorm)
-        if (difX**2 + difY**2) > 0:
-            self.accelerate(selfXnorm - objXnorm, selfYnorm - objYnorm)
-            return False
-        return True
+        # print difX**2 + difY**2
+        if (difX**2 + difY**2) > .01:
+            self.accelerate(difX, difY)
+            return True
+        return False
 
 
     def accelerate(self, vectX, vectY):

@@ -16,6 +16,7 @@ class GrandObserver:
 
         self.ball = ball
 
+        self.closestDefender = None
         self.stoppingPlayer = None
 
     def analyze(self):
@@ -36,7 +37,7 @@ class GrandObserver:
         defendingTeam.players.sort(key=lambda x: x.getDistanceToGoalline(False))
 
         self.lastDefender = defendingTeam.players[1]  # goalie is excluded
-        self.lastAttacker = attackingTeam.players[-2] # goalie is excluded
+        self.lastAttacker = attackingTeam.players[-2]  # goalie is excluded
 
         self.findClosestDefenders(defendingTeam)
         self.setCoveredAndBlockedPlayers(attackingTeam, defendingTeam)
@@ -60,8 +61,14 @@ class GrandObserver:
         closestAttacker.chargeToBall = True
 
     def findClosestDefenders(self, defendingTeam):
-        self.closestDefender = defendingTeam.players[0]
-        self.stoppingPlayer = defendingTeam.players[0]
+        if not self.closestDefender:
+            self.closestDefender = defendingTeam.players[0]
+        if not self.stoppingPlayer:
+            self.stoppingPlayer = defendingTeam.players[0]
+        previousClosestDefender = self.closestDefender
+        previousStoppingPlayer = self.stoppingPlayer
+
+
         self.openPlayers = []
         for defendingPlayer in defendingTeam.players:
             defendingPlayer.blocking = []
@@ -69,11 +76,10 @@ class GrandObserver:
             defendingPlayer.chargeToBall = False
             defendingPlayer.marking = None
 
-            if defendingPlayer.getDistanceTo(self.ball) < self.closestDefender.getDistanceTo(self.ball):
+            if previousClosestDefender.getDistanceTo(self.ball) - 2 > defendingPlayer.getDistanceTo(self.ball) < self.closestDefender.getDistanceTo(self.ball):
                 self.closestDefender = defendingPlayer
-            if defendingPlayer.getDistanceToGoalline(False) < self.ball.getDistanceToGoalline(False,
-                                                                                              defendingPlayer.team.isDefendingLeft):
-                if defendingPlayer.getDistanceTo(self.ball) < self.closestDefender.getDistanceTo(self.ball):
+            if defendingPlayer.getDistanceToGoalline(False) < self.ball.getDistanceToGoalline(False, defendingPlayer.team.isDefendingLeft):
+                if previousStoppingPlayer.getDistanceTo(self.ball) - 2 > defendingPlayer.getDistanceTo(self.ball) < self.stoppingPlayer.getDistanceTo(self.ball):
                     self.stoppingPlayer = defendingPlayer
 
         self.closestDefender.chargeToBall = True
@@ -86,7 +92,7 @@ class GrandObserver:
             attackingPlayer.coveredBy = []
             for defendingPlayer in defendingTeam.players:
                 # Check blocked players
-                #TODO: use player attributes as modifiers
+                # TODO: use player attributes as modifiers
                 if attackingPlayer.getDistanceTo(self.ball) > defendingPlayer.getDistanceTo(self.ball):
                     defendingAngle = math.atan2(self.ball.posX - defendingPlayer.posX,
                                                 self.ball.posY - defendingPlayer.posY)

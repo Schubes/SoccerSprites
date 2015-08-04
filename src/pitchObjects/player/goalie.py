@@ -26,18 +26,32 @@ class Goalie(AbstractPlayer):
 
     def makeAction(self, grandObserver):
         if self.hasBall:
-            # if self.wait():
+            # if self.ball.outOfPlay:
+            #     self.mustPass()
+            #     return
+            # elif self.wait():
             #     return
             # else:
-            self.mustPass()
-            return
-        elif self.chargeToBall and self.nearBall():
+            if not self.lookToPass(grandObserver):
+                self.mustPass()
+                return
+        elif self.chargeToBall:
             self.chase(self.ball)
             return
         else:
-            if self.cover(self.ball):
-                self.accelerate(0,0)
-            return
+            if self.getWeightedDistanceToGoal(False) > self.ball.posX/4:
+                self.chase(self.team.goal)
+                return
+            if not self.coverObject(self.ball):
+                if self.team.hasPossession:
+                    if self.ball.target is self:
+                        self.chase(self.ball)
+                        return
+                    else:
+                        self.accelerate(self.relX(1, self.team.isDefendingLeft), 0)
+                        return
+
+
 
     def wait(self):
         if self.waitTime < 1:

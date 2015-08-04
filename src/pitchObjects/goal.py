@@ -6,11 +6,11 @@ __author__ = 'Thomas'
 
 
 class Goal(PitchObject):
-    def __init__(self, rightGoal):
-        if rightGoal:
-            posX = FIELD_LENGTH + 1.5
+    def __init__(self, leftGoal):
+        if leftGoal:
+            posX = - 1.5
         else:
-            posX = -1.5
+            posX = FIELD_LENGTH + 1.5
         posY = FIELD_WIDTH/2
         PitchObject.__init__(self, COLOR_GOAL, posX, posY, GRAPH_GOAL_SIZE)
         PitchObject.update(self)

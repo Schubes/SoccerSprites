@@ -8,6 +8,7 @@ from gamevariables import STRAT_NEAR_BALL, ATTR_PLAYER_SPEED, ATTR_SHOOTING_RANG
 from pitchObjects.player.abstractPlayer import AbstractPlayer
 from pitchObjects.homeposition import HomePosition
 from pitchObjects.pitchobject import PitchObject
+from pitchObjects.player.goalie import Goalie
 
 
 __author__ = 'Thomas'
@@ -71,6 +72,8 @@ class FieldPlayer(AbstractPlayer):
 
         xdif = grandObserver.stoppingPlayer.posX - self.posX
         ydif = self.posY - grandObserver.stoppingPlayer.posY
+        if self.getDistanceTo(grandObserver.stoppingPlayer) > 3 :
+             self.accelerate(self.dirX(1), 0)
         if xdif > 2:
             self.accelerate(xdif, FIELD_WIDTH/2 - self.posY)
         else:
@@ -95,7 +98,7 @@ class FieldPlayer(AbstractPlayer):
                     if abs(self.posY - FIELD_WIDTH/2) - abs(self.ball.possessor.posY - FIELD_WIDTH/2) > 0:
                         self.chase(self.homePosition)
                         return
-                    self.cover(self.ball.possessor)
+                    self.coverObject(self.ball.possessor)
                     return
 
             else:
@@ -105,36 +108,35 @@ class FieldPlayer(AbstractPlayer):
 
     def defend(self, grandObserver):
         """ handles and prioritizes all defensive movement"""
-        if self.ball.outOfPlay:
+        if self.ball.outOfPlay or type(self.ball.possessor) is Goalie:
             self.chase(self.homePosition)
             return
         elif self.returnOnsides(grandObserver):
             return
-        if self.chargeToBall or self.nearBall() and ((self.ball.posX - self.posX) < 0 == self.ball.velX < 0) and \
-                ((self.ball.posY - self.posY) < 0 == self.ball.velY < 0):
-            if self.cover(self.ball):
+        if self.chargeToBall or self.nearBall():
+            if not self.coverObject(self.ball):
                 self.chase(self.ball)
             return
         if not pygame.sprite.collide_rect(self, self.homePosition):
             self.chase(self.homePosition)
             return
         if self.marking:
-            self.cover(self.marking)
+            self.coverObject(self.marking)
             return
 
         self.team.players.sort(key=lambda x: x.getDistanceTo(self))
         ind = 0
         neighbor = self.team.players[ind]
         while neighbor.getDistanceTo(self) < STRAT_NEIGHBOR_MIN_DISTANCE:
-            # if neighbor.getDistanceTo(self.homePosition) < self.getDistanceTo(self.homePosition) \
-            #         and neighbor.getDistanceTo(neighbor.homePosition) > self.getDistanceTo(neighbor.homePosition):
-            #     print "Position swap"
-            #     newPosition = neighbor.homePosition
-            #     neighbor.homePosition = self.homePosition
-            #     self.homePosition = newPosition
+            if neighbor.getDistanceTo(self.homePosition) < self.getDistanceTo(self.homePosition) \
+                    and neighbor.getDistanceTo(neighbor.homePosition) > self.getDistanceTo(neighbor.homePosition):
+                print "Position swap"
+                newPosition = neighbor.homePosition
+                neighbor.homePosition = self.homePosition
+                self.homePosition = newPosition
             if neighbor.getDistanceTo(self.ball) < self.getDistanceTo(self.ball):
                 if neighbor.getDistanceTo(neighbor.homePosition) > self.getDistanceTo(neighbor.homePosition):
-                    self.cover(neighbor.homePosition)
+                    self.coverObject(neighbor.homePosition)
                 return
 
             ind += 1
@@ -143,5 +145,5 @@ class FieldPlayer(AbstractPlayer):
             neighbor = self.team.players[ind]
 
         else:
-            self.cover(self.ball)
+            self.coverObject(self.ball)
             return
