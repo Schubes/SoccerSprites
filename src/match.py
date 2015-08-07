@@ -1,9 +1,11 @@
 import pygame
 from controllers.possessioncontroller import PossessionController
+from controllers.scorecontroller import ScoreController
 from display.displaymapper import convertFieldPosition, convertYards2Pixels, FIELD_LENGTH, FIELD_WIDTH, WINDOW_HEADER_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT
 from gamevariables import COLOR_TEAM_BLUE, COLOR_TEAM_RED, COLOR_GRASS, COLOR_PAINT, PAINT_WIDTH, COLOR_HEADER
 from grandobserver import GrandObserver
 from pitchObjects.ball import Ball
+from pitchObjects.goal import Goal
 from team import Team
 
 __author__ = 'Thomas'
@@ -20,13 +22,17 @@ class Match:
         self.pitchSurface = self.createPitchSurface()
         self.fieldBackground = self.createPitchSurface()
 
+        self.leftGoal = Goal(True)
+        self.rightGoal = Goal(False)
+
         #Required Initialization of required classes for Match
-        self.team1 = Team(True, COLOR_TEAM_BLUE, "Blue Team")
-        self.team2 = Team(False, COLOR_TEAM_RED, "Red Team")
+        self.team1 = Team(True, COLOR_TEAM_BLUE, "Blue Team", self.leftGoal)
+        self.team2 = Team(False, COLOR_TEAM_RED, "Red Team", self.rightGoal)
 
         self.possessionController = PossessionController(self.team1, self.team2)
+        self.scoreController = ScoreController(self.team1, self.team2)
 
-        self.ball = Ball(self.possessionController)
+        self.ball = Ball(self.possessionController, self.scoreController, self.leftGoal, self.rightGoal)
 
         self.grandObserver = GrandObserver(self.team1, self.team2, self.ball)
 
@@ -42,7 +48,7 @@ class Match:
         self.allPlayers.add(self.team2.players)
 
         #OBJECTS TO BE DRAWN
-        self.allPitchObjects = pygame.sprite.LayeredDirty(self.allPlayers, self.ballGroup, self.team1.goal, self.team2.goal)
+        self.allPitchObjects = pygame.sprite.LayeredDirty(self.allPlayers, self.ballGroup, self.leftGoal, self.rightGoal)
         self.allPitchObjects.move_to_back(self.ball)
 
         # For Debugging Home Position
@@ -54,6 +60,7 @@ class Match:
 
         # Match Start Time
         self.startTime = pygame.time.get_ticks()
+
 
 
     def playMatchTurn(self):
@@ -68,6 +75,14 @@ class Match:
         self.allPitchObjects.clear(self.pitchSurface, self.fieldBackground)
         self.window.blit(self.pitchSurface, (0, WINDOW_HEADER_HEIGHT))
         self.window.blit(self.header, (0, 0))
+
+        score_font = pygame.font.Font(None, 30)
+        score_render = score_font.render("{0}: {1}".format(self.team1.name, self.team1.score), True, self.team1.color)
+        self.window.blit(score_render, (15,25))
+        score_render = score_font.render("{0}: {1}".format(self.team2.name, self.team2.score), True, self.team2.color)
+        self.window.blit(score_render, (15,55))
+        time_render = score_font.render("{0}:{1}".format(pygame.time.get_ticks() / 60000, pygame.time.get_ticks() / 1000 % 60), True, COLOR_PAINT)
+        self.window.blit(time_render, (WINDOW_WIDTH/2-15, 40))
 
 
     def createPitchSurface(self):

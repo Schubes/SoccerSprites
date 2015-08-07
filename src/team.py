@@ -6,13 +6,14 @@ from pitchObjects.player.goalie import Goalie
 __author__ = 'Thomas'
 
 class Team:
-    def __init__(self, isDefendingLeft, color, name):
+    def __init__(self, isDefendingLeft, color, name, goal):
         self.isDefendingLeft = isDefendingLeft
-        self.goal = Goal(isDefendingLeft)
+        self.goal = goal
         self.hasPossession = isDefendingLeft
         self.color = color
         self.players = []
         self.name = name
+        self.score = 0
 
     def setStartingLineUp(self, formation, ball, window):
         players = []
@@ -23,9 +24,9 @@ class Team:
         # FieldPlayers
         for lineNum, line in enumerate(formation):
             for posNum, position in enumerate(range(line)):
-                perX = float(lineNum + 1)/len(formation)
+                perX = float(lineNum + 1)/len(formation) - .05
                 if self.isDefendingLeft:
-                    posX = perX * FIELD_LENGTH/2
+                    posX = perX * (FIELD_LENGTH/2)
                 else:
                     posX = FIELD_LENGTH - (perX * FIELD_LENGTH/2)
                 perY = float(posNum+.5)/line

@@ -39,6 +39,21 @@ class FieldPlayer(AbstractPlayer):
         """
         Calls the appropriate action logic for the player based on possession and ball control status.
         """
+        if self.ball.outOfPlay is "Kickoff" and grandObserver.resumePlay is False:
+            if not self.team.hasPossession:
+                if self.getDistanceTo(self.ball) < 30 or self.getDistanceToGoalline(False) > 3*FIELD_LENGTH/8:
+                    self.accelerate(self.dirX(-1), 0)
+                    return
+            if self.hasBall:
+                # TODO: modify accelerate method enable complete stopping
+                self.velX = 0
+                self.velY = 0
+                return
+            elif self.chargeToBall is True:
+                self.chase(self.ball)
+                return
+            self.chase(self.relX(self.homePosition.defaultPosX, self.team.isDefendingLeft), self.homePosition.defaultPosY)
+            return
         if self.team.hasPossession:
             if self.hasBall:
                 self.makePlay(grandObserver)
@@ -68,7 +83,7 @@ class FieldPlayer(AbstractPlayer):
                 return
 
     def dribble(self, grandObserver):
-        assert self.hasBall
+        # assert self.hasBall
 
         xdif = grandObserver.stoppingPlayer.posX - self.posX
         ydif = self.posY - grandObserver.stoppingPlayer.posY
@@ -81,12 +96,8 @@ class FieldPlayer(AbstractPlayer):
 
     def makeRun(self, grandObserver):
         """ handles and prioritizes all offensive movement"""
-        # During Kickoffs, don't move
-        if self.ball.outOfPlay is "Kickoff":
-            pass
-
         # If about to go offsides run back onsides
-        elif self.returnOnsides(grandObserver):
+        if self.returnOnsides(grandObserver):
             return
         else:
             #If the player is the intended recipient of a pass try to receive it
@@ -94,13 +105,15 @@ class FieldPlayer(AbstractPlayer):
                 self.intercept(self.ball)
                 return
             elif pygame.sprite.collide_rect(self, self.homePosition):
+                if self.blockedBy:
+                    self.chase(self.ball)
+                    return
                 if self.ball.possessor:
                     if abs(self.posY - FIELD_WIDTH/2) - abs(self.ball.possessor.posY - FIELD_WIDTH/2) > 0:
                         self.chase(self.homePosition)
                         return
                     self.coverObject(self.ball.possessor)
                     return
-
             else:
                 self.chase(self.homePosition)
                 return

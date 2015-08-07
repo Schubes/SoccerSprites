@@ -47,9 +47,18 @@ class AbstractPlayer(PitchObject):
         self.move()
         PitchObject.update(self)
 
-    def chase(self, pitchObject):
-        difX = pitchObject.posX - self.posX
-        difY = pitchObject.posY - self.posY
+    def chase(self, pitchObject, posY = None):
+        """ If one param is passed, chases that pitchObject.
+        If two params (posX and posY) are passed chases that location.
+        """
+        if posY:
+            posX = pitchObject
+        else:
+            posX = pitchObject.posX
+            posY = pitchObject.posY
+
+        difX = posX - self.posX
+        difY = posY - self.posY
         difMag = abs(difX) + abs(difY)
         if difMag > 0:
             self.accelerate(float(difX) / difMag, float(difY) / difMag)
@@ -168,17 +177,21 @@ class AbstractPlayer(PitchObject):
         """
         if grandObserver.openPlayers:
             bestPassOption = self
+            secondWorstPassOption = None
             worstPassOption = None
             for openPlayer in grandObserver.openPlayers:
                 if openPlayer is self.ball.prevPossessor:
-                    worstPassOption = openPlayer
-                if openPlayer is self:
+                    secondWorstPassOption = openPlayer
+                elif openPlayer is self:
                     break
-                if math.sqrt((openPlayer.posY - self.posY)**2 + abs(openPlayer.posX - self.posX)**2) > STRAT_MIN_PASS:
+                elif math.sqrt((openPlayer.posY - self.posY)**2 + abs(openPlayer.posX - self.posX)**2) > STRAT_MIN_PASS:
                     bestPassOption = openPlayer
                     break
             if bestPassOption is not self:
                 self.ball.passTo(bestPassOption, True)
+                return True
+            elif secondWorstPassOption:
+                self.ball.passTo(secondWorstPassOption, True)
                 return True
             elif worstPassOption:
                 print "and it's played back"

@@ -58,6 +58,4 @@ class HomePosition(PitchObject):
         if (self.ball.outOfPlay is "CornerKick"):
             if self.team.hasPossession:
                 return 20
-            else:
-                return -20
         return 0

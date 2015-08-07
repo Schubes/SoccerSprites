@@ -10,11 +10,15 @@ from pitchObjects.player.goalie import Goalie
 __author__ = 'Thomas'
 
 class Ball(PitchObject):
-    def __init__(self, possessionController):
+    def __init__(self, possessionController, scoreController, leftGoal, rightGoal):
         PitchObject.__init__(self, COLOR_BALL, self.getStartingPosX(), self.getStartingPosY(), GRAPH_BALL_SIZE)
         self.image.set_alpha(255)
 
         self.possessionController = possessionController
+        self.scoreController = scoreController
+        self.leftGoal = leftGoal
+        self.rightGoal = rightGoal
+
         self.possessor = None
         self.prevPossessor = None
         self.isLoose = True
@@ -92,6 +96,7 @@ class Ball(PitchObject):
             if self.shot:
                 if random.random() > .5:
                     winningPlayer = None
+                    print "The goalie couldn't stop it"
 
         return winningPlayer
 
@@ -167,7 +172,15 @@ class Ball(PitchObject):
         self.outOfPlay = None
 
     def checkOutOfBounds(self):
-        """keep players from running out of bounds"""
+
+        if pygame.sprite.collide_rect(self, self.leftGoal):
+            self.scoreController.newGoal(True, self.possessionController)
+            self.kickOff()
+        elif pygame.sprite.collide_rect(self, self.rightGoal):
+            self.scoreController.newGoal(False, self.possessionController)
+            self.kickOff()
+
+
         if self.posX > FIELD_LENGTH + MECH_BALL_SIZE:
             self.posX = FIELD_LENGTH + MECH_BALL_SIZE
             if self.blameTeam():
@@ -226,6 +239,18 @@ class Ball(PitchObject):
 
         self.target = None
         self.shot = False
+
+    def kickOff(self):
+        self.possessor = None
+        self.prevPossessor = None
+        self.isLoose = True
+        self.target = None
+        self.shot = False
+        self.outOfPlay = "Kickoff"
+        self.posX = self.getStartingPosX()
+        self.poxY = self.getStartingPosY()
+        self.velX = 0
+        self.velY = 0
 
     def getStartingPosX(self):
         return FIELD_LENGTH/2

@@ -2,7 +2,7 @@ import math
 
 import pygame
 
-from display.displaymapper import FIELD_WIDTH
+from display.displaymapper import FIELD_WIDTH, FIELD_LENGTH
 from gamevariables import STRAT_BLOCKAGE, STRAT_COVERAGE, STRAT_MIN_PASS
 
 
@@ -38,6 +38,23 @@ class GrandObserver:
 
         self.lastDefender = defendingTeam.players[1]  # goalie is excluded
         self.lastAttacker = attackingTeam.players[-2]  # goalie is excluded
+
+        self.resumePlay = True
+        if self.ball.outOfPlay is "Kickoff":
+            for player in attackingTeam.players:
+                if attackingTeam.isDefendingLeft:
+                    if player.posX > FIELD_LENGTH/2:
+                        self.resumePlay = False
+                elif player.posX < FIELD_WIDTH/2:
+                    self.resumePlay = False
+            for player in defendingTeam.players:
+                if defendingTeam.isDefendingLeft:
+                    if player.posX > FIELD_LENGTH/2:
+                        self.resumePlay = False
+                elif player.posX < FIELD_LENGTH/2:
+                    self.resumePlay = False
+                if player.getDistanceTo(self.ball) < 10:
+                    self.resumePlay = False
 
         self.findClosestDefenders(defendingTeam)
         self.setCoveredAndBlockedPlayers(attackingTeam, defendingTeam)
