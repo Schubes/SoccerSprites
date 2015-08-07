@@ -37,7 +37,7 @@ ATTR_SHOOTING_RANGE = 30 #Abstract Units check its usage
 MECH_TURNS_RECOVERING = max(float(GAME_FPS)/2,3)
 MECH_BALL_SPEED = 1000/GAME_FPS
 MECH_BALL_SIZE = 1 #size in yards
-MECH_PASS_VEL_MODIFIER = 2 #just a magic number that works well
+MECH_PASS_VEL_MODIFIER = .03 #just a magic number that works well
 MECH_GRASS_FRICTION = .01 # Friction coefficient for passes made on the ground
 
 GRAPH_PLAYER_SIZE = [convertYards2Pixels(float(4)/3), convertYards2Pixels(float(4)/3)]

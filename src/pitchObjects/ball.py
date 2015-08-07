@@ -30,8 +30,9 @@ class Ball(PitchObject):
         """ method called by matchturn using existing pygame.sprite implementation"""
         self.move()
         self.checkOutOfBounds()
-        self.evaluateControl(players)
         PitchObject.update(self)
+        self.evaluateControl(players)
+
 
     def move(self):
         """ Rolls the ball according to its own velocity or its possessor's, and applies friction coefficient"""
@@ -148,8 +149,8 @@ class Ball(PitchObject):
         self.kicked()
         self.target = player
         if throughPass:
-            difX = player.posX - self.posX + player.velX / MECH_PASS_VEL_MODIFIER #Just a magic number that works well
-            difY = player.posY - self.posY + player.velY / MECH_PASS_VEL_MODIFIER
+            difX = player.posX - self.posX + player.velX * self.getDistanceTo(player) * MECH_PASS_VEL_MODIFIER
+            difY = player.posY - self.posY + player.velY * self.getDistanceTo(player) * MECH_PASS_VEL_MODIFIER
         else:
             difX = player.posX - self.posX
             difY = player.posY - self.posY
@@ -248,7 +249,7 @@ class Ball(PitchObject):
         self.shot = False
         self.outOfPlay = "Kickoff"
         self.posX = self.getStartingPosX()
-        self.poxY = self.getStartingPosY()
+        self.posY = self.getStartingPosY()
         self.velX = 0
         self.velY = 0
 

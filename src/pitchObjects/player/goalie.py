@@ -35,7 +35,7 @@ class Goalie(AbstractPlayer):
             if not self.lookToPass(grandObserver):
                 self.mustPass()
                 return
-        elif self.chargeToBall:
+        elif self.chargeToBall and not (self.team.hasPossession is False and self.ball.outOfPlay):
             self.chase(self.ball)
             return
         else:

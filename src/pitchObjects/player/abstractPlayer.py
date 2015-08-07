@@ -180,13 +180,14 @@ class AbstractPlayer(PitchObject):
             secondWorstPassOption = None
             worstPassOption = None
             for openPlayer in grandObserver.openPlayers:
-                if openPlayer is self.ball.prevPossessor:
-                    secondWorstPassOption = openPlayer
-                elif openPlayer is self:
-                    break
-                elif math.sqrt((openPlayer.posY - self.posY)**2 + abs(openPlayer.posX - self.posX)**2) > STRAT_MIN_PASS:
-                    bestPassOption = openPlayer
-                    break
+                if not openPlayer.recovering:
+                    if openPlayer is self.ball.prevPossessor:
+                        secondWorstPassOption = openPlayer
+                    elif openPlayer is self:
+                        break
+                    elif math.sqrt((openPlayer.posY - self.posY)**2 + abs(openPlayer.posX - self.posX)**2) > STRAT_MIN_PASS:
+                        bestPassOption = openPlayer
+                        break
             if bestPassOption is not self:
                 self.ball.passTo(bestPassOption, True)
                 return True
